@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Loader2 } from 'lucide-react';
@@ -49,7 +48,11 @@ const HymnList = () => {
           displayHymns.map((hymn) => (
             <button
               key={`${hymn.language}-${hymn.id || hymn.number}`}
-              onClick={() => navigate(`/hymn/${hymn.id}`)}
+              onClick={() => {
+                navigate(`/hymn/${hymn.id}`, {
+                  state: { language: hymn.language }
+                });
+              }}
               className="w-full p-4 text-left rounded-lg bg-card hover:bg-accent transition-colors duration-200 group"
             >
               <div className="flex items-center">

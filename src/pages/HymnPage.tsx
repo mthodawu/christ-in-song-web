@@ -1,43 +1,37 @@
-
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import HymnDisplay from '@/components/HymnDisplay';
 import Navigation from '@/components/Navigation';
 import { useHymn } from '@/context/HymnContext';
 import hymnService from '@/services/hymnService';
-import type { Hymn } from '@/types/hymn';
+import type { Hymn, Language } from '@/types/hymn';
 import { toast } from 'sonner';
 
 const HymnPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { primaryLanguage } = useHymn();
+  const location = useLocation();
+  const { primaryLanguage, setPrimaryLanguage } = useHymn();
   const [hymn, setHymn] = useState<Hymn | null>(null);
   const [currentHymnNumber, setCurrentHymnNumber] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Effect to load hymn when ID or language changes
   useEffect(() => {
     const loadHymn = async () => {
       if (!id) return;
       
       setLoading(true);
       try {
-        // First try to load the exact ID
-        let hymnData = await hymnService.getHymnById(id, primaryLanguage);
+        // Get the language from location state or use primaryLanguage as fallback
+        const hymnLanguage = (location.state?.language || primaryLanguage) as Language;
         
-        // If not found but we have a currentHymnNumber, try to load by number in the new language
-        if (!hymnData && currentHymnNumber) {
-          const newId = `${primaryLanguage.toLowerCase()}-${currentHymnNumber}`;
-          hymnData = await hymnService.getHymnById(newId, primaryLanguage);
-          
-          if (hymnData) {
-            // Update URL to reflect the new hymn ID
-            navigate(`/hymn/${newId}`, { replace: true });
-          }
-        }
+        // Set the primary language to match the hymn's language
+        setPrimaryLanguage(hymnLanguage);
+        
+        // Load the hymn in the specified language
+        let hymnData = await hymnService.getHymnById(id, hymnLanguage);
         
         if (hymnData) {
           setHymn(hymnData);
@@ -58,8 +52,8 @@ const HymnPage = () => {
     };
 
     loadHymn();
-  }, [id, primaryLanguage, currentHymnNumber, navigate]);
-
+  }, [id, location.state?.language, setPrimaryLanguage]);
+  
   if (loading) {
     return (
       <div className="min-h-screen pt-16 flex items-center justify-center">
