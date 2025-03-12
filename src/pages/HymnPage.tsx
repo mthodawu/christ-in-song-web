@@ -1,5 +1,5 @@
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import HymnDisplay from '@/components/HymnDisplay';
@@ -7,35 +7,58 @@ import Navigation from '@/components/Navigation';
 import { useHymn } from '@/context/HymnContext';
 import hymnService from '@/services/hymnService';
 import type { Hymn } from '@/types/hymn';
+import { toast } from 'sonner';
 
 const HymnPage = () => {
   const { id } = useParams<{ id: string }>();
   const { primaryLanguage } = useHymn();
   const [hymn, setHymn] = useState<Hymn | null>(null);
+  const [currentHymnNumber, setCurrentHymnNumber] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
+  // Effect to load hymn when ID or language changes
   useEffect(() => {
     const loadHymn = async () => {
       if (!id) return;
       
       setLoading(true);
       try {
-        const hymnData = await hymnService.getHymnById(id, primaryLanguage);
-        setHymn(hymnData);
-        if (!hymnData) {
-          setError('Hymn not found');
+        // First try to load the exact ID
+        let hymnData = await hymnService.getHymnById(id, primaryLanguage);
+        
+        // If not found but we have a currentHymnNumber, try to load by number in the new language
+        if (!hymnData && currentHymnNumber) {
+          const newId = `${primaryLanguage.toLowerCase()}-${currentHymnNumber}`;
+          hymnData = await hymnService.getHymnById(newId, primaryLanguage);
+          
+          if (hymnData) {
+            // Update URL to reflect the new hymn ID
+            navigate(`/hymn/${newId}`, { replace: true });
+          }
+        }
+        
+        if (hymnData) {
+          setHymn(hymnData);
+          setCurrentHymnNumber(hymnData.number);
+          setError(null);
+        } else {
+          setHymn(null);
+          setError('Hymn not found in the selected language');
+          toast.error('This hymn is not available in the selected language');
         }
       } catch (err) {
         console.error('Error loading hymn:', err);
         setError('Failed to load hymn');
+        toast.error('Failed to load hymn');
       } finally {
         setLoading(false);
       }
     };
 
     loadHymn();
-  }, [id, primaryLanguage]);
+  }, [id, primaryLanguage, currentHymnNumber, navigate]);
 
   if (loading) {
     return (

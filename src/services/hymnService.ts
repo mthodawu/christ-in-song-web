@@ -1,3 +1,4 @@
+
 import { Language, Hymn, HymnData } from '@/types/hymn';
 
 export const availableLanguages: Language[] = [
@@ -100,9 +101,34 @@ export const searchHymnsAcrossLanguages = async (
 export const getHymnById = async (id: string, language: Language): Promise<Hymn | null> => {
   try {
     const hymns = await loadHymnsForLanguage(language);
-    return hymns.find(h => h.id === id) || null;
+    
+    // First try to find by exact ID
+    let hymn = hymns.find(h => h.id === id);
+    
+    // If not found and the ID might contain a hymn number, try to find by number
+    if (!hymn && id.includes('-')) {
+      const hymnNumberStr = id.split('-')[1];
+      if (hymnNumberStr) {
+        const hymnNumber = parseInt(hymnNumberStr, 10);
+        if (!isNaN(hymnNumber)) {
+          hymn = hymns.find(h => h.number === hymnNumber);
+        }
+      }
+    }
+    
+    return hymn || null;
   } catch (error) {
     console.error(`Failed to get hymn with ID ${id}:`, error);
+    return null;
+  }
+};
+
+export const getHymnByNumber = async (number: number, language: Language): Promise<Hymn | null> => {
+  try {
+    const hymns = await loadHymnsForLanguage(language);
+    return hymns.find(h => h.number === number) || null;
+  } catch (error) {
+    console.error(`Failed to get hymn with number ${number}:`, error);
     return null;
   }
 };
@@ -115,5 +141,6 @@ export default {
   availableLanguages,
   getAllHymnsForLanguage,
   getHymnById,
+  getHymnByNumber,
   searchHymnsAcrossLanguages
 };
