@@ -14,6 +14,7 @@ const loadHymnsForLanguage = async (language: Language): Promise<Hymn[]> => {
   }
 
   try {
+    // console.log(`Loading hymns for ${language}...`);
     const response = await fetch(`/data/${language.toLowerCase()}.json`);
     const data = await response.json();
     
