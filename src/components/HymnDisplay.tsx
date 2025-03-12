@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHymn } from '@/context/HymnContext';
 import hymnService from '@/services/hymnService';
+import { cn } from '@/lib/utils';
 import type { Hymn } from '@/types/hymn';
 
 interface HymnDisplayProps {
@@ -16,6 +17,7 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
   const { primaryLanguage, secondaryLanguage, isDualMode } = useHymn();
   const navigate = useNavigate();
   const [secondaryHymn, setSecondaryHymn] = useState<Hymn | null>(null);
+  const [formattedVerses, setFormattedVerses] = useState<React.ReactNode[]>([]);
 
   // Load secondary language hymn if in dual mode
   useEffect(() => {
@@ -23,8 +25,8 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
       const fetchSecondaryHymn = async () => {
         try {
           const secondaryId = `${secondaryLanguage.toLowerCase()}-${hymn.number}`;
-          const hymData = await hymnService.getHymnById(secondaryId, secondaryLanguage);
-          setSecondaryHymn(hymData);
+          const hymnData = await hymnService.getHymnById(secondaryId, secondaryLanguage);
+          setSecondaryHymn(hymnData);
         } catch (error) {
           console.error('Failed to load secondary hymn:', error);
         }
@@ -34,6 +36,65 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
       setSecondaryHymn(null);
     }
   }, [hymn.number, isDualMode, secondaryLanguage]);
+
+  // Format verses with alternating lines when in dual mode
+  useEffect(() => {
+    if (!hymn.verses || hymn.verses.length === 0) {
+      setFormattedVerses([]);
+      return;
+    }
+
+    const currentPrimaryVerse = hymn.verses[currentVerse].content;
+    const primaryLines = currentPrimaryVerse.split(' ').reduce((acc: string[], word: string, index: number) => {
+      const lineIndex = Math.floor(index / 6);
+      if (!acc[lineIndex]) acc[lineIndex] = '';
+      acc[lineIndex] += (acc[lineIndex] ? ' ' : '') + word;
+      return acc;
+    }, []);
+
+    if (!isDualMode || !secondaryHymn || !secondaryHymn.verses || !secondaryHymn.verses[currentVerse]) {
+      // If not in dual mode or no secondary verse, just display primary lines
+      setFormattedVerses(primaryLines.map((line, i) => (
+        <div key={`primary-${i}`} className="mb-4">{line}</div>
+      )));
+      return;
+    }
+
+    const secondaryVerseContent = secondaryHymn.verses[currentVerse].content;
+    const secondaryLines = secondaryVerseContent.split(' ').reduce((acc: string[], word: string, index: number) => {
+      const lineIndex = Math.floor(index / 6);
+      if (!acc[lineIndex]) acc[lineIndex] = '';
+      acc[lineIndex] += (acc[lineIndex] ? ' ' : '') + word;
+      return acc;
+    }, []);
+
+    // Create alternating lines of primary and secondary content
+    const alternatingLines: React.ReactNode[] = [];
+    const maxLines = Math.max(primaryLines.length, secondaryLines.length);
+
+    for (let i = 0; i < maxLines; i++) {
+      // Add primary line if available
+      if (primaryLines[i]) {
+        alternatingLines.push(
+          <div key={`primary-${i}`} className="mb-2">{primaryLines[i]}</div>
+        );
+      }
+
+      // Add secondary line if available
+      if (secondaryLines[i]) {
+        alternatingLines.push(
+          <div 
+            key={`secondary-${i}`} 
+            className="mb-4 text-emerald-600 dark:text-emerald-400 italic"
+          >
+            [{secondaryLines[i]}]
+          </div>
+        );
+      }
+    }
+
+    setFormattedVerses(alternatingLines);
+  }, [hymn.verses, currentVerse, isDualMode, secondaryHymn]);
 
   if (!hymn.verses || hymn.verses.length === 0) {
     return (
@@ -65,16 +126,13 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
       </header>
 
       <main className="flex-1 flex items-center justify-center p-4">
-        <div className="max-w-4xl w-full space-y-8 verse-transition">
-          <div className="hymn-text text-center">
-            {verses[currentVerse].content}
+        <div className="max-w-4xl w-full space-y-4 verse-transition">
+          <div className={cn(
+            "hymn-text text-center",
+            isDualMode && "text-left"
+          )}>
+            {formattedVerses}
           </div>
-          
-          {isDualMode && secondaryHymn && secondaryHymn.verses && secondaryHymn.verses[currentVerse] && (
-            <div className="hymn-text text-center text-muted-foreground">
-              {secondaryHymn.verses[currentVerse].content}
-            </div>
-          )}
           
           <div className="text-center text-muted-foreground">
             Verse {currentVerse + 1} of {verses.length}
