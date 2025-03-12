@@ -2,8 +2,7 @@
 import { Language, Hymn, HymnData } from '@/types/hymn';
 
 export const availableLanguages: Language[] = [
-  'abagusii', 'chichewa', 'dg', 'dholuo', 'english', 'es', 'gikuyu', 'hl',
-  'kinyarwanda', 'kirundi', 'ndebele', 'pt', 'ru', 'sdah', 'shona', 'sotho',
+   'chichewa', 'dholuo', 'english', 'ndebele', 'pt',  'sdah', 'shona', 'sotho',
   'swahili', 'tonga', 'tswana', 'venda', 'xhosa', 'xitsonga'
 ];
 
