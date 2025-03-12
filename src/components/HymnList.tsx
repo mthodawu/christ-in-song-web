@@ -53,9 +53,9 @@ const HymnList = () => {
               className="w-full p-4 text-left rounded-lg bg-card hover:bg-accent transition-colors duration-200 group"
             >
               <div className="flex items-center">
-                <span className="text-2xl font-light text-muted-foreground mr-4">
+                {/* <span className="text-2xl font-light text-muted-foreground mr-4">
                   {hymn.number.toString().padStart(3, '0')}
-                </span>
+                </span> */}
                 <div className="flex-1">
                   <span className="text-xl group-hover:text-primary transition-colors duration-200 block">
                     {hymn.title}
