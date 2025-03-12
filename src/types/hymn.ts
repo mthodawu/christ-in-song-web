@@ -1,19 +1,22 @@
 
-export type Language = 'English' | 'Spanish' | 'French' | 'German' | 'Italian' | 'Portuguese' | 'Chinese' | 'Korean';
+export type Language = 'English' | 'Spanish' | 'French' | 'German' | 'Italian' | 'Portuguese' | 'Chinese' | 'Korean' |
+  'Abagusii' | 'Chichewa' | 'DG' | 'Dholuo' | 'ES' | 'Gikuyu' | 'HL' | 'Kinyarwanda' | 'Kirundi' | 'Ndebele' | 
+  'PT' | 'RU' | 'SDAH' | 'Shona' | 'Sotho' | 'Swahili' | 'Tonga' | 'Tswana' | 'Venda' | 'Xhosa' | 'Xitsonga';
 
 export interface Verse {
   number: number;
   content: string;
 }
 
-export interface HymnTranslation {
-  language: Language;
+export interface Hymn {
+  id?: string;
+  number: number;
   title: string;
-  verses: Verse[];
+  markdown: string;
+  verses?: Verse[];
 }
 
-export interface Hymn {
-  id: string;
-  number: number;
-  translations: HymnTranslation[];
+export interface HymnData {
+  language: Language;
+  hymns: Hymn[];
 }

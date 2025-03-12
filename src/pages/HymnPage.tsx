@@ -1,15 +1,60 @@
 
 import { useParams } from 'react-router-dom';
-import hymnsData from '@/data/hymns.json';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import HymnDisplay from '@/components/HymnDisplay';
 import Navigation from '@/components/Navigation';
+import { useHymn } from '@/context/HymnContext';
+import hymnService from '@/services/hymnService';
+import type { Hymn } from '@/types/hymn';
 
 const HymnPage = () => {
-  const { id } = useParams();
-  const hymn = hymnsData.hymns.find(h => h.id === id);
+  const { id } = useParams<{ id: string }>();
+  const { primaryLanguage } = useHymn();
+  const [hymn, setHymn] = useState<Hymn | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!hymn) {
-    return <div>Hymn not found</div>;
+  useEffect(() => {
+    const loadHymn = async () => {
+      if (!id) return;
+      
+      setLoading(true);
+      try {
+        const hymnData = await hymnService.getHymnById(id, primaryLanguage);
+        setHymn(hymnData);
+        if (!hymnData) {
+          setError('Hymn not found');
+        }
+      } catch (err) {
+        console.error('Error loading hymn:', err);
+        setError('Failed to load hymn');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHymn();
+  }, [id, primaryLanguage]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-16 flex items-center justify-center">
+        <Navigation />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !hymn) {
+    return (
+      <div className="min-h-screen pt-16">
+        <Navigation />
+        <div className="container mx-auto py-8 text-center">
+          <h2 className="text-2xl font-bold text-destructive">{error || 'Hymn not found'}</h2>
+        </div>
+      </div>
+    );
   }
 
   return (

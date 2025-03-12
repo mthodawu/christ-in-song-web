@@ -1,6 +1,7 @@
 
-import React, { createContext, useContext, useState } from 'react';
-import { Language } from '@/types/hymn';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Language, Hymn } from '@/types/hymn';
+import hymnService, { availableLanguages } from '@/services/hymnService';
 
 interface HymnContextType {
   primaryLanguage: Language;
@@ -11,6 +12,12 @@ interface HymnContextType {
   setIsDualMode: (isDual: boolean) => void;
   isDarkMode: boolean;
   setIsDarkMode: (isDark: boolean) => void;
+  hymns: Hymn[];
+  isLoading: boolean;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  searchResults: Array<Hymn & { language: Language }>;
+  availableLanguages: Language[];
 }
 
 const HymnContext = createContext<HymnContextType | undefined>(undefined);
@@ -20,6 +27,46 @@ export function HymnProvider({ children }: { children: React.ReactNode }) {
   const [secondaryLanguage, setSecondaryLanguage] = useState<Language | null>(null);
   const [isDualMode, setIsDualMode] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [hymns, setHymns] = useState<Hymn[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Array<Hymn & { language: Language }>>([]);
+
+  // Load hymns when the language changes
+  useEffect(() => {
+    const loadHymns = async () => {
+      setIsLoading(true);
+      try {
+        const loadedHymns = await hymnService.getAllHymnsForLanguage(primaryLanguage);
+        setHymns(loadedHymns);
+      } catch (error) {
+        console.error('Failed to load hymns:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadHymns();
+  }, [primaryLanguage]);
+
+  // Handle search across languages
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const results = await hymnService.searchHymnsAcrossLanguages(searchQuery, primaryLanguage);
+        setSearchResults(results);
+      } catch (error) {
+        console.error('Search failed:', error);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, primaryLanguage]);
 
   return (
     <HymnContext.Provider
@@ -32,6 +79,12 @@ export function HymnProvider({ children }: { children: React.ReactNode }) {
         setIsDualMode,
         isDarkMode,
         setIsDarkMode,
+        hymns,
+        isLoading,
+        searchQuery,
+        setSearchQuery,
+        searchResults,
+        availableLanguages
       }}
     >
       {children}

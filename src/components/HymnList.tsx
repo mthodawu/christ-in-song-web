@@ -1,30 +1,31 @@
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useHymn } from '@/context/HymnContext';
-import type { Hymn } from '@/types/hymn';
+import { Badge } from '@/components/ui/badge';
 
-interface HymnListProps {
-  hymns: Hymn[];
-}
-
-const HymnList = ({ hymns }: HymnListProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const { primaryLanguage } = useHymn();
+const HymnList = () => {
+  const { 
+    hymns, 
+    isLoading, 
+    primaryLanguage, 
+    searchQuery, 
+    setSearchQuery, 
+    searchResults 
+  } = useHymn();
   const navigate = useNavigate();
 
-  const filteredHymns = hymns.filter((hymn) => {
-    const translation = hymn.translations.find((t) => t.language === primaryLanguage);
-    if (!translation) return false;
-    
-    const searchLower = searchQuery.toLowerCase();
+  const displayHymns = searchQuery.trim() ? searchResults : hymns.map(hymn => ({ ...hymn, language: primaryLanguage }));
+
+  if (isLoading) {
     return (
-      hymn.number.toString().includes(searchLower) ||
-      translation.title.toLowerCase().includes(searchLower)
+      <div className="w-full max-w-2xl mx-auto px-4 flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
-  });
+  }
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4">
@@ -32,7 +33,7 @@ const HymnList = ({ hymns }: HymnListProps) => {
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search hymns..."
+          placeholder="Search hymns across all languages..."
           className="pl-10"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -40,13 +41,14 @@ const HymnList = ({ hymns }: HymnListProps) => {
       </div>
       
       <div className="space-y-2">
-        {filteredHymns.map((hymn) => {
-          const translation = hymn.translations.find((t) => t.language === primaryLanguage);
-          if (!translation) return null;
-          
-          return (
+        {displayHymns.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No hymns found. Try a different search term.
+          </div>
+        ) : (
+          displayHymns.map((hymn) => (
             <button
-              key={hymn.id}
+              key={`${hymn.language}-${hymn.id || hymn.number}`}
               onClick={() => navigate(`/hymn/${hymn.id}`)}
               className="w-full p-4 text-left rounded-lg bg-card hover:bg-accent transition-colors duration-200 group"
             >
@@ -54,13 +56,20 @@ const HymnList = ({ hymns }: HymnListProps) => {
                 <span className="text-2xl font-light text-muted-foreground mr-4">
                   {hymn.number.toString().padStart(3, '0')}
                 </span>
-                <span className="text-xl group-hover:text-primary transition-colors duration-200">
-                  {translation.title}
-                </span>
+                <div className="flex-1">
+                  <span className="text-xl group-hover:text-primary transition-colors duration-200 block">
+                    {hymn.title}
+                  </span>
+                  {hymn.language !== primaryLanguage && (
+                    <Badge variant="outline" className="mt-1">
+                      {hymn.language}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </button>
-          );
-        })}
+          ))
+        )}
       </div>
     </div>
   );

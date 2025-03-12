@@ -10,17 +10,6 @@ import {
 import { useHymn } from '@/context/HymnContext';
 import type { Language } from '@/types/hymn';
 
-const LANGUAGES: Language[] = [
-  'English',
-  'Spanish',
-  'French',
-  'German',
-  'Italian',
-  'Portuguese',
-  'Chinese',
-  'Korean',
-];
-
 const Navigation = () => {
   const {
     primaryLanguage,
@@ -31,6 +20,7 @@ const Navigation = () => {
     setIsDualMode,
     isDarkMode,
     setIsDarkMode,
+    availableLanguages
   } = useHymn();
 
   const toggleDarkMode = () => {
@@ -50,7 +40,7 @@ const Navigation = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {LANGUAGES.map((lang) => (
+            {availableLanguages.map((lang) => (
               <DropdownMenuItem
                 key={lang}
                 onClick={() => setPrimaryLanguage(lang)}
@@ -78,7 +68,7 @@ const Navigation = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {LANGUAGES.filter((lang) => lang !== primaryLanguage).map((lang) => (
+                {availableLanguages.filter((lang) => lang !== primaryLanguage).map((lang) => (
                   <DropdownMenuItem
                     key={lang}
                     onClick={() => setSecondaryLanguage(lang)}
