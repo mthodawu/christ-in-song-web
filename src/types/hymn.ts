@@ -1,7 +1,6 @@
-
-export type Language = 'English' | 'Spanish' | 'French' | 'German' | 'Italian' | 'Portuguese' | 'Chinese' | 'Korean' |
-  'Abagusii' | 'Chichewa' | 'DG' | 'Dholuo' | 'ES' | 'Gikuyu' | 'HL' | 'Kinyarwanda' | 'Kirundi' | 'Ndebele' | 
-  'PT' | 'RU' | 'SDAH' | 'Shona' | 'Sotho' | 'Swahili' | 'Tonga' | 'Tswana' | 'Venda' | 'Xhosa' | 'Xitsonga';
+export type Language = 'abagusii' | 'chichewa' | 'dg' | 'dholuo' | 'english' | 'es' | 'gikuyu' | 'hl' | 
+  'kinyarwanda' | 'kirundi' | 'ndebele' | 'pt' | 'ru' | 'sdah' | 'shona' | 'sotho' | 'swahili' | 
+  'tonga' | 'tswana' | 'venda' | 'xhosa' | 'xitsonga';
 
 export interface Verse {
   number: number;

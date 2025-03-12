@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Language, Hymn } from '@/types/hymn';
 import hymnService, { availableLanguages } from '@/services/hymnService';
@@ -23,7 +22,7 @@ interface HymnContextType {
 const HymnContext = createContext<HymnContextType | undefined>(undefined);
 
 export function HymnProvider({ children }: { children: React.ReactNode }) {
-  const [primaryLanguage, setPrimaryLanguage] = useState<Language>('English');
+  const [primaryLanguage, setPrimaryLanguage] = useState<Language>('english');
   const [secondaryLanguage, setSecondaryLanguage] = useState<Language | null>(null);
   const [isDualMode, setIsDualMode] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -32,7 +31,6 @@ export function HymnProvider({ children }: { children: React.ReactNode }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Array<Hymn & { language: Language }>>([]);
 
-  // Load hymns when the language changes
   useEffect(() => {
     const loadHymns = async () => {
       setIsLoading(true);
@@ -49,7 +47,6 @@ export function HymnProvider({ children }: { children: React.ReactNode }) {
     loadHymns();
   }, [primaryLanguage]);
 
-  // Handle search across languages
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
