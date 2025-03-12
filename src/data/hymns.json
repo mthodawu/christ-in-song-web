@@ -1,0 +1,39 @@
+
+{
+  "hymns": [
+    {
+      "id": "1",
+      "number": 1,
+      "translations": [
+        {
+          "language": "English",
+          "title": "Amazing Grace",
+          "verses": [
+            {
+              "number": 1,
+              "content": "Amazing grace! How sweet the sound\nThat saved a wretch like me!\nI once was lost, but now am found\nWas blind, but now I see."
+            },
+            {
+              "number": 2,
+              "content": "'Twas grace that taught my heart to fear,\nAnd grace my fears relieved;\nHow precious did that grace appear\nThe hour I first believed."
+            }
+          ]
+        },
+        {
+          "language": "Spanish",
+          "title": "Sublime Gracia",
+          "verses": [
+            {
+              "number": 1,
+              "content": "Sublime gracia del Señor\nQue a un infeliz salvó\nFui ciego mas hoy veo yo\nPerdido y Él me halló"
+            },
+            {
+              "number": 2,
+              "content": "Su gracia me enseñó a temer\nMis dudas ahuyentó\n¡Qué precioso fue a mi ser\nCuando Él me transformó!"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
