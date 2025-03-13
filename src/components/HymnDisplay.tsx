@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowLeft, Edit, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import HymnEditForm from '@/components/HymnEditForm';
 import { useHymn } from '@/context/HymnContext';
 import hymnService from '@/services/hymnService';
 import { cn } from '@/lib/utils';
@@ -12,12 +13,19 @@ interface HymnDisplayProps {
   hymn: Hymn;
 }
 
-const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
+const HymnDisplay = ({ hymn: initialHymn }: HymnDisplayProps) => {
   const [currentVerse, setCurrentVerse] = useState(0);
+  const [hymn, setHymn] = useState<Hymn>(initialHymn);
+  const [isEditing, setIsEditing] = useState(false);
   const { primaryLanguage, secondaryLanguage, isDualMode } = useHymn();
   const navigate = useNavigate();
   const [secondaryHymn, setSecondaryHymn] = useState<Hymn | null>(null);
   const [formattedVerses, setFormattedVerses] = useState<React.ReactNode[]>([]);
+
+  // Update local hymn state when the prop changes
+  useEffect(() => {
+    setHymn(initialHymn);
+  }, [initialHymn]);
 
   // Load secondary language hymn if in dual mode
   useEffect(() => {
@@ -96,6 +104,11 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
     setFormattedVerses(alternatingLines);
   }, [hymn.verses, currentVerse, isDualMode, secondaryHymn]);
 
+  const handleSaveHymn = (updatedHymn: Hymn) => {
+    setHymn(updatedHymn);
+    setIsEditing(false);
+  };
+
   if (!hymn.verses || hymn.verses.length === 0) {
     return (
       <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center">
@@ -114,53 +127,79 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
 
   return (
     <div className="min-h-[calc(100vh-5rem)] flex flex-col">
-      <header className="p-4 flex items-center">
-        <Button variant="ghost" onClick={() => navigate('/')} className="mr-4">
-          <ArrowLeft className="mr-2" />
-          Back to Hymns
-        </Button>
-        <div>
-          <h1 className="text-2xl font-light">{hymn.title}</h1>
-          <p className="text-muted-foreground">Hymn {hymn.number}</p>
+      <header className="p-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <Button variant="ghost" onClick={() => navigate('/')} className="mr-4">
+            <ArrowLeft className="mr-2" />
+            Back to Hymns
+          </Button>
+          <div>
+            <h1 className="text-2xl font-light">{hymn.title}</h1>
+            <p className="text-muted-foreground">Hymn {hymn.number}</p>
+          </div>
         </div>
+        
+        {!isEditing && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setIsEditing(true)}
+            className="flex items-center gap-1"
+          >
+            <Edit className="h-4 w-4" />
+            Edit Hymn
+          </Button>
+        )}
       </header>
 
       <main className="flex-1 flex items-center justify-center p-4">
-        <div className="max-w-4xl w-full space-y-4 verse-transition">
-          <div className={cn(
-            "hymn-text text-center",
-            isDualMode && "text-left"
-          )}>
-            {formattedVerses}
+        {isEditing ? (
+          <div className="max-w-4xl w-full">
+            <HymnEditForm 
+              hymn={hymn} 
+              onCancel={() => setIsEditing(false)} 
+              onSave={handleSaveHymn} 
+            />
           </div>
-          
-          <div className="text-center text-muted-foreground">
-            Verse {currentVerse + 1} of {verses.length}
+        ) : (
+          <div className="max-w-4xl w-full space-y-4 verse-transition">
+            <div className={cn(
+              "hymn-text text-center",
+              isDualMode && "text-left"
+            )}>
+              {formattedVerses}
+            </div>
+            
+            <div className="text-center text-muted-foreground">
+              Verse {currentVerse + 1} of {verses.length}
+            </div>
           </div>
-        </div>
+        )}
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t">
-        <div className="max-w-4xl mx-auto p-4 flex justify-between items-center">
-          <Button
-            variant="outline"
-            onClick={() => hasPrevVerse && setCurrentVerse(currentVerse - 1)}
-            disabled={!hasPrevVerse}
-          >
-            <ChevronLeft className="mr-2" />
-            Previous
-          </Button>
-          
-          <Button
-            variant="outline"
-            onClick={() => hasNextVerse && setCurrentVerse(currentVerse + 1)}
-            disabled={!hasNextVerse}
-          >
-            Next
-            <ChevronRight className="ml-2" />
-          </Button>
-        </div>
-      </footer>
+      {!isEditing && (
+        <footer className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t">
+          <div className="max-w-4xl mx-auto p-4 flex justify-between items-center">
+            <Button
+              variant="outline"
+              onClick={() => hasPrevVerse && setCurrentVerse(currentVerse - 1)}
+              disabled={!hasPrevVerse}
+            >
+              <ChevronLeft className="mr-2" />
+              Previous
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={() => hasNextVerse && setCurrentVerse(currentVerse + 1)}
+              disabled={!hasNextVerse}
+            >
+              Next
+              <ChevronRight className="ml-2" />
+            </Button>
+          </div>
+        </footer>
+      )}
     </div>
   );
 };

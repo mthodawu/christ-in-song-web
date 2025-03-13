@@ -1,4 +1,7 @@
-import { Language, Hymn, HymnData } from "@/types/hymn";
+
+import { Language, Hymn } from "@/types/hymn";
+import * as dbService from './databaseService';
+import { processMarkdownToVerses } from './verseService';
 
 export const availableLanguages: Language[] = [
   "chichewa",
@@ -17,140 +20,24 @@ export const availableLanguages: Language[] = [
   "xitsonga",
 ];
 
-const hymnsCache: Record<Language, Hymn[]> = {} as Record<Language, Hymn[]>;
+// Initialize the database when the app starts
+export const initializeHymnService = async (): Promise<void> => {
+  await dbService.initDatabase();
+};
 
-const loadHymnsForLanguage = async (language: Language): Promise<Hymn[]> => {
-  if (hymnsCache[language]) {
-    return hymnsCache[language];
-  }
-
+export const getAllHymnsForLanguage = async (
+  language: Language
+): Promise<Hymn[]> => {
   try {
-    // console.log(`Loading hymns for ${language}...`);
-    const response = await fetch(`/data/${language.toLowerCase()}.json`);
-    const data = await response.json();
-
-    const processedHymns = data.map((hymn: any, index: number) => {
-      const processedHymn: Hymn = {
-        id: hymn.id || `${language.toLowerCase()}-${hymn.number}`,
-        number: hymn.number,
-        title: hymn.title,
-        markdown: hymn.markdown,
-        verses: processMarkdownToVerses(hymn.markdown),
-      };
-      return processedHymn;
-    });
-
-    hymnsCache[language] = processedHymns;
-    return processedHymns;
+    const hymns = dbService.getHymnsByLanguage(language);
+    return hymns.map(hymn => ({
+      ...hymn,
+      verses: processMarkdownToVerses(hymn.markdown),
+    }));
   } catch (error) {
     console.error(`Failed to load hymns for ${language}:`, error);
     return [];
   }
-};
-
-const processMarkdownToVerses = (
-  markdown: string
-): { number: number; content: string }[] => {
-  if (!markdown) return [];
-
-  const lines = markdown.split("\n");
-  const verses = [];
-  let currentVerse = "";
-  let chorus = "";
-  let verseNumber = 1;
-  let isChorus = false;
-  let hasChorus = false;
-
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    if (trimmedLine === "" && currentVerse !== "") {
-      // if (hasChorus) {
-      if (verseNumber == 2 && isChorus) {
-        verseNumber++;
-        verses.push({ content: chorus });
-        console.log("VerseNumber: ", verseNumber )
-        // chorus = "";
-      }
-      if (!isChorus && chorus !== "" && verseNumber !== 2) {
-        verses.push({ number: verseNumber++, content: currentVerse.trim() });
-         console.log("VerseNumber: ", verseNumber, "verse+: ", currentVerse)
-        verses.push({ content: chorus });
-        console.log("VerseNumber: ", verseNumber, "chorus: ", chorus)
-      }
-      // }
-      else {
-        verses.push({ number: verseNumber++, content: currentVerse.trim() });
-        console.log("VerseNumber: ", verseNumber, "verse: ", currentVerse)
-      }
-      currentVerse = "";
-      isChorus = false;
-    } else if (trimmedLine.startsWith("**CHORUS:**")) {
-      isChorus = true;
-      currentVerse += trimmedLine.replace("**CHORUS:**", "Chorus: ");
-      // if(isChorus){
-      //   chorus = currentVerse.trim();
-      //   hasChorus = true;
-      // }
-        } else if (
-      !trimmedLine.startsWith("###") &&
-      !trimmedLine.startsWith("**CHORUS:**") &&
-      !trimmedLine.startsWith("Verse") &&
-      !trimmedLine.startsWith("**") &&
-      !trimmedLine.startsWith("Chorus") &&
-      !/^\d+\./.test(trimmedLine) // Ignore lines starting with a number followed by a dot
-        ) {
-      currentVerse += trimmedLine + "\n";
-      if (isChorus) {
-        chorus = currentVerse.trim();
-        hasChorus = true;
-      }
-    }
-  }
-
-  if (currentVerse !== "") {
-    console.log("VerseNumber: ", verseNumber++, "verse--: ", currentVerse)
-    verses.push({ number: verseNumber, content: currentVerse.trim() });
-    verses.push({ content: chorus });
-  }
-
-  return verses;
-};
-
-export const searchHymnsAcrossLanguages = async (
-  query: string,
-  primaryLanguage: Language
-): Promise<Array<Hymn & { language: Language }>> => {
-  const results: Array<Hymn & { language: Language }> = [];
-
-  const primaryHymns = await loadHymnsForLanguage(primaryLanguage);
-  const primaryResults = primaryHymns
-    .filter(
-      (hymn) =>
-        hymn.number.toString().includes(query.toLowerCase()) ||
-        hymn.title.toLowerCase().includes(query.toLowerCase()) ||
-        hymn.markdown.toLowerCase().includes(query.toLowerCase())
-    )
-    .map((hymn) => ({ ...hymn, language: primaryLanguage }));
-
-  results.push(...primaryResults);
-
-  for (const language of availableLanguages) {
-    if (language === primaryLanguage) continue;
-
-    const hymns = await loadHymnsForLanguage(language);
-    const languageResults = hymns
-      .filter(
-        (hymn) =>
-          hymn.number.toString().includes(query.toLowerCase()) ||
-          hymn.title.toLowerCase().includes(query.toLowerCase()) ||
-          hymn.markdown.toLowerCase().includes(query.toLowerCase())
-      )
-      .map((hymn) => ({ ...hymn, language }));
-
-    results.push(...languageResults);
-  }
-
-  return results;
 };
 
 export const getHymnById = async (
@@ -158,23 +45,32 @@ export const getHymnById = async (
   language: Language
 ): Promise<Hymn | null> => {
   try {
-    const hymns = await loadHymnsForLanguage(language);
-
-    // First try to find by exact ID
-    let hymn = hymns.find((h) => h.id === id);
-
-    // If not found and the ID might contain a hymn number, try to find by number
-    if (!hymn && id.includes("-")) {
-      const hymnNumberStr = id.split("-")[1];
-      if (hymnNumberStr) {
-        const hymnNumber = parseInt(hymnNumberStr, 10);
-        if (!isNaN(hymnNumber)) {
-          hymn = hymns.find((h) => h.number === hymnNumber);
+    const hymn = dbService.getHymnById(id, language);
+    
+    if (!hymn) {
+      // If not found and the ID might contain a hymn number, try to find by number
+      if (id.includes("-")) {
+        const hymnNumberStr = id.split("-")[1];
+        if (hymnNumberStr) {
+          const hymnNumber = parseInt(hymnNumberStr, 10);
+          if (!isNaN(hymnNumber)) {
+            const hymnByNumber = dbService.getHymnByNumber(hymnNumber, language);
+            if (hymnByNumber) {
+              return {
+                ...hymnByNumber,
+                verses: processMarkdownToVerses(hymnByNumber.markdown),
+              };
+            }
+          }
         }
       }
+      return null;
     }
-
-    return hymn || null;
+    
+    return {
+      ...hymn,
+      verses: processMarkdownToVerses(hymn.markdown),
+    };
   } catch (error) {
     console.error(`Failed to get hymn with ID ${id}:`, error);
     return null;
@@ -186,24 +82,71 @@ export const getHymnByNumber = async (
   language: Language
 ): Promise<Hymn | null> => {
   try {
-    const hymns = await loadHymnsForLanguage(language);
-    return hymns.find((h) => h.number === number) || null;
+    const hymn = dbService.getHymnByNumber(number, language);
+    if (!hymn) return null;
+    
+    return {
+      ...hymn,
+      verses: processMarkdownToVerses(hymn.markdown),
+    };
   } catch (error) {
     console.error(`Failed to get hymn with number ${number}:`, error);
     return null;
   }
 };
 
-export const getAllHymnsForLanguage = async (
-  language: Language
-): Promise<Hymn[]> => {
-  return loadHymnsForLanguage(language);
+export const searchHymnsAcrossLanguages = async (
+  query: string,
+  primaryLanguage: Language
+): Promise<Array<Hymn & { language: Language }>> => {
+  const results: Array<Hymn & { language: Language }> = [];
+
+  try {
+    // Search in primary language first
+    const primaryResults = dbService.searchHymns(query, primaryLanguage)
+      .map(hymn => ({
+        ...hymn,
+        verses: processMarkdownToVerses(hymn.markdown),
+        language: primaryLanguage
+      }));
+    
+    results.push(...primaryResults);
+
+    // Then search in other languages
+    for (const language of availableLanguages) {
+      if (language === primaryLanguage) continue;
+
+      const languageResults = dbService.searchHymns(query, language)
+        .map(hymn => ({
+          ...hymn,
+          verses: processMarkdownToVerses(hymn.markdown),
+          language
+        }));
+
+      results.push(...languageResults);
+    }
+  } catch (error) {
+    console.error('Error searching hymns:', error);
+  }
+
+  return results;
+};
+
+export const saveHymn = async (hymn: Hymn, language: Language): Promise<void> => {
+  try {
+    dbService.saveHymn(hymn, language);
+  } catch (error) {
+    console.error('Failed to save hymn:', error);
+    throw error;
+  }
 };
 
 export default {
   availableLanguages,
+  initializeHymnService,
   getAllHymnsForLanguage,
   getHymnById,
   getHymnByNumber,
   searchHymnsAcrossLanguages,
+  saveHymn,
 };

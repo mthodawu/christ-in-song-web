@@ -1,5 +1,37 @@
-import { createRoot } from 'react-dom/client'
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { HymnProvider } from './context/HymnContext.tsx';
+import hymnService from './services/hymnService.ts';
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Initialize the database before rendering the app
+const initApp = async () => {
+  try {
+    await hymnService.initializeHymnService();
+    
+    ReactDOM.createRoot(document.getElementById('root')!).render(
+      <React.StrictMode>
+        <HymnProvider>
+          <App />
+        </HymnProvider>
+      </React.StrictMode>,
+    );
+  } catch (error) {
+    console.error('Failed to initialize app:', error);
+    // Show error message
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.innerHTML = `
+        <div style="text-align: center; padding: 2rem;">
+          <h1>Failed to initialize application</h1>
+          <p>There was an error loading the database. Please try refreshing the page.</p>
+          <button onclick="window.location.reload()">Refresh</button>
+        </div>
+      `;
+    }
+  }
+};
+
+initApp();
