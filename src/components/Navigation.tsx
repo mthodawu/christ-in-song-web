@@ -1,6 +1,7 @@
 
-import { Moon, Sun, Languages } from 'lucide-react';
+import { Moon, Sun, Languages, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +21,9 @@ const Navigation = () => {
     setIsDualMode,
     isDarkMode,
     setIsDarkMode,
-    availableLanguages
+    availableLanguages,
+    searchQuery,
+    setSearchQuery
   } = useHymn();
 
   const toggleDarkMode = () => {
@@ -30,8 +33,8 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-b">
-      <div className="max-w-4xl mx-auto px-4 py-2 flex justify-between items-center">
+    <nav className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-b z-10">
+      <div className="max-w-4xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
@@ -50,6 +53,17 @@ const Navigation = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <div className="relative flex-1 mx-2 max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search hymns..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
         <div className="flex gap-2">
           <Button

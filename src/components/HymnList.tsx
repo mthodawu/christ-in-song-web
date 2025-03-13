@@ -1,7 +1,7 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Loader2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Loader2 } from 'lucide-react';
 import { useHymn } from '@/context/HymnContext';
 import { Badge } from '@/components/ui/badge';
 
@@ -11,7 +11,6 @@ const HymnList = () => {
     isLoading, 
     primaryLanguage, 
     searchQuery, 
-    setSearchQuery, 
     searchResults 
   } = useHymn();
   const navigate = useNavigate();
@@ -27,18 +26,7 @@ const HymnList = () => {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4">
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Search hymns across all languages..."
-          className="pl-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-      
+    <div className="w-full max-w-2xl mx-auto px-4">      
       <div className="space-y-2">
         {displayHymns.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
@@ -56,9 +44,6 @@ const HymnList = () => {
               className="w-full p-4 text-left rounded-lg bg-card hover:bg-accent transition-colors duration-200 group"
             >
               <div className="flex items-center">
-                {/* <span className="text-2xl font-light text-muted-foreground mr-4">
-                  {hymn.number.toString().padStart(3, '0')}
-                </span> */}
                 <div className="flex-1">
                   <span className="text-xl group-hover:text-primary transition-colors duration-200 block">
                     {hymn.title}
