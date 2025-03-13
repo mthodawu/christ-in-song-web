@@ -2,8 +2,9 @@ export type Language =  'chichewa' | 'dholuo' | 'english' |  'ndebele' | 'pt' | 
   'tonga' | 'tswana' | 'venda' | 'xhosa' | 'xitsonga';
 
 export interface Verse {
-  number: number;
+  number?: number;
   content: string;
+
 }
 
 export interface Hymn {
