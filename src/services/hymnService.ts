@@ -91,10 +91,14 @@ const processMarkdownToVerses = (
       //   chorus = currentVerse.trim();
       //   hasChorus = true;
       // }
-    } else if (
+        } else if (
       !trimmedLine.startsWith("###") &&
-      !trimmedLine.startsWith("**CHORUS:**")
-    ) {
+      !trimmedLine.startsWith("**CHORUS:**") &&
+      !trimmedLine.startsWith("Verse") &&
+      !trimmedLine.startsWith("**") &&
+      !trimmedLine.startsWith("Chorus") &&
+      !/^\d+\./.test(trimmedLine) // Ignore lines starting with a number followed by a dot
+        ) {
       currentVerse += trimmedLine + "\n";
       if (isChorus) {
         chorus = currentVerse.trim();
