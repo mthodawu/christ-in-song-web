@@ -40,12 +40,12 @@ export function findById(collection: string, id: string) {
       return db.collection(collection).findOne({ _id: new ObjectId(id) });
     } else {
       // If not a valid ObjectId format, search by string ID
-      return db.collection(collection).findOne({ _id: id });
+      return db.collection(collection).findOne({ _id: new ObjectId(id) });
     }
   } catch (error) {
     console.error("Error finding by ID:", error);
     // Fallback to string ID
-    return db.collection(collection).findOne({ _id: id });
+    return db.collection(collection).findOne({ _id: new ObjectId(id) });
   }
 }
 
@@ -66,12 +66,12 @@ export const getHymnById = async (language: Language, id: string) => {
       return collection.findOne({ _id: new ObjectId(id) });
     } else {
       // If not a valid ObjectId format, search by string ID
-      return collection.findOne({ _id: id });
+      return collection.findOne({ _id: new ObjectId(id) });
     }
   } catch (error) {
     console.error("Error finding hymn by ID:", error);
     // Fallback to string ID
-    return collection.findOne({ _id: id });
+    return collection.findOne({ _id: new ObjectId(id) });
   }
 };
 
