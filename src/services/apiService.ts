@@ -1,3 +1,4 @@
+
 import type { Document } from 'mongodb';
 
 export interface ApiResponse<T> {
@@ -7,12 +8,21 @@ export interface ApiResponse<T> {
 
 export const apiService = {
   async findOne(collection: string, id: string): Promise<Document | null> {
-    const response = await fetch(`/api/${collection}/${id}`);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+    try {
+      const response = await fetch(`/api/${collection}/${id}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    } catch (error) {
+      console.error('API findOne error:', error);
+      return null;
     }
-    return response.json();
   },
+  
   async fetchData<T>(endpoint: string): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`/api/${endpoint}`);

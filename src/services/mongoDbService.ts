@@ -110,7 +110,8 @@ export const getHymnById = async (id: string, language: Language): Promise<Hymn 
   
   try {
     const collection = getHymnsCollection(language);
-    const hymn = await collection.findOne({ _id: new ObjectId(id)  });
+    // Use string ID directly since we store string IDs, not ObjectIds
+    const hymn = await collection.findOne({ _id: id });
     
     if (!hymn) return null;
     
@@ -185,7 +186,7 @@ export const saveHymn = async (hymn: Hymn, language: Language): Promise<void> =>
     const id = hymn.id || `${language.toLowerCase()}-${hymn.number}`;
     
     await collection.updateOne(
-      { _id: new ObjectId(id)  },
+      { _id: id },
       { 
         $set: {
           id: id, 

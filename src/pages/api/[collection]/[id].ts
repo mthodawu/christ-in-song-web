@@ -1,3 +1,4 @@
+
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { findById } from '@/server/mongoService';
 
@@ -21,6 +22,7 @@ export default async function handler(
     }
     res.status(200).json(result);
   } catch (error) {
+    console.error('API error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
