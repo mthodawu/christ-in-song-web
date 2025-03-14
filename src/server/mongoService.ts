@@ -54,11 +54,11 @@ export function findById(collection: string, id: string) {
   try {
     // Try to convert to ObjectId if it looks like a MongoDB ObjectId
     const objectId = toObjectId(id);
-    return db.collection(collection).findOne({ _id: objectId });
+    return db.collection(collection).findOne({ _id: new ObjectId(id)});
   } catch (error) {
     console.error("Error finding by ID:", error);
     // Fallback to string ID
-    return db.collection(collection).findOne({ _id: id });
+    return db.collection(collection).findOne({ _id: new ObjectId(id) });
   }
 }
 
@@ -75,10 +75,10 @@ export const getHymnById = async (language: Language, id: string) => {
   const collection = getHymnsCollection(language);
   try {
     const objectId = toObjectId(id);
-    return collection.findOne({ _id: objectId });
+    return collection.findOne({ _id: new ObjectId(id) });
   } catch (error) {
     console.error("Error finding hymn by ID:", error);
-    return collection.findOne({ _id: id });
+    return collection.findOne({ _id: new ObjectId(id) });
   }
 };
 
@@ -106,7 +106,7 @@ export const saveHymn = async (language: Language, hymn: any) => {
     // Update existing hymn
     const objectId = toObjectId(_id.toString());
     await collection.updateOne(
-      { _id: objectId },
+      { _id: new ObjectId(objectId) },
       { $set: hymnWithoutId }
     );
     return { ...hymn, _id };
@@ -115,7 +115,7 @@ export const saveHymn = async (language: Language, hymn: any) => {
     const id = `${language.toLowerCase()}-${hymn.number}`;
     const result = await collection.insertOne({
       ...hymnWithoutId,
-      _id: id,
+      _id: new ObjectId(id),
       id: id
     });
     return { ...hymn, _id: result.insertedId };
@@ -153,7 +153,7 @@ export const setupCollections = async (
       const formattedHymns = hymns.map((hymn: any) => {
         const id = hymn.id || `${language.toLowerCase()}-${hymn.number}`;
         return {
-          _id: id,
+          _id: new ObjectId(id),
           id: id,
           number: hymn.number,
           title: hymn.title,
