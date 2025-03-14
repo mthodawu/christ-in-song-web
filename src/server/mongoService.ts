@@ -136,3 +136,15 @@ export const setupCollections = async (
     }
   }
 };
+
+export default {
+  initMongoDB,
+  closeMongoDB,
+  findById,
+  getHymnsByLanguage,
+  getHymnById,
+  getHymnByNumber,
+  searchHymns,
+  saveHymn,
+  setupCollections
+};

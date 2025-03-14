@@ -31,7 +31,7 @@ const HymnPage = () => {
         setPrimaryLanguage(hymnLanguage);
         
         // Load the hymn in the specified language
-        let hymnData = await hymnService.getHymnById(id, hymnLanguage);
+        let hymnData = await hymnService.getHymnByNumber(hymnLanguage, id);
         
         if (hymnData) {
           setHymn(hymnData);

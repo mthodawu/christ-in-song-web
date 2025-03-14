@@ -4,16 +4,16 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { HymnProvider } from './context/HymnContext.tsx';
-import hymnService from './services/hymnService.ts';
+import mongoService from '../src/server/mongoService';
 
 // MongoDB connection string - in a real app, this would come from environment variables
-const MONGODB_URI = 'mongodb://localhost:27017'; // Use a local MongoDB or replace with your actual connection string
+const MONGODB_URI = 'mongodb+srv://mthodawu:jTmYqy2s1e4o9ySa@tutortrackdb.7ndm2.mongodb.net/'; // Use a local MongoDB or replace with your actual connection string
 
 // Initialize the app and connect to MongoDB
 const initApp = async () => {
   try {
     // Initialize the hymn service which will connect to MongoDB
-    await hymnService.initializeHymnService(MONGODB_URI);
+    await mongoService.initMongoDB(MONGODB_URI);
     
     ReactDOM.createRoot(document.getElementById('root')!).render(
       <React.StrictMode>
