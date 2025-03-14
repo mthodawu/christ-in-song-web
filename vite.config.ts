@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -12,6 +13,7 @@ export default defineConfig(({ mode }) => ({
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
       },
     },
   },
@@ -25,4 +27,13 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Explicitly exclude server-only modules from client bundle
+  optimizeDeps: {
+    exclude: ['mongodb']
+  },
+  build: {
+    commonjsOptions: {
+      exclude: ['mongodb']
+    }
+  }
 }));

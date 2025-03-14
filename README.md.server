@@ -1,0 +1,236 @@
+
+# Hymns App Server Setup
+
+This document explains how to set up the server component for the Hymns application.
+
+## Prerequisites
+
+- Node.js 16+
+- MongoDB installed and running
+- Environment variables configured
+
+## Server Setup Instructions
+
+1. Create a server.js file in the project root:
+
+```javascript
+const express = require('express');
+const { MongoClient } = require('mongodb');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hymns_db';
+
+// Middleware
+app.use(express.json());
+
+// Connect to MongoDB
+let db;
+MongoClient.connect(MONGO_URI)
+  .then(client => {
+    console.log('Connected to MongoDB');
+    db = client.db('hymns_db');
+    
+    // Initialize collections if needed
+    setupCollections();
+  })
+  .catch(error => {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  });
+
+// Setup collections with initial data
+async function setupCollections() {
+  const languages = [
+    "chichewa", "dholuo", "english", "ndebele", "pt",
+    "sdah", "shona", "sotho", "swahili", "tonga",
+    "tswana", "venda", "xhosa", "xitsonga"
+  ];
+  
+  for (const language of languages) {
+    const collectionName = `hymns_${language}`;
+    
+    // Check if collection exists
+    const collections = await db.listCollections({name: collectionName}).toArray();
+    if (collections.length > 0) {
+      console.log(`Collection ${collectionName} already exists`);
+      continue;
+    }
+    
+    // Create collection
+    await db.createCollection(collectionName);
+    console.log(`Created collection ${collectionName}`);
+    
+    // Load data from JSON file if available
+    try {
+      const dataPath = path.join(__dirname, 'public', 'data', `${language}.json`);
+      if (fs.existsSync(dataPath)) {
+        const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+        
+        if (data.length > 0) {
+          // Format the data with proper _id field
+          const formattedData = data.map(hymn => ({
+            _id: hymn.id || `${language}-${hymn.number}`,
+            id: hymn.id || `${language}-${hymn.number}`,
+            number: hymn.number,
+            title: hymn.title,
+            markdown: hymn.markdown
+          }));
+          
+          await db.collection(collectionName).insertMany(formattedData);
+          console.log(`Loaded ${formattedData.length} hymns for ${language}`);
+        }
+      }
+    } catch (error) {
+      console.error(`Error loading data for ${language}:`, error);
+    }
+  }
+}
+
+// API Routes
+app.get('/hymns/:language', async (req, res) => {
+  try {
+    const { language } = req.params;
+    const collection = db.collection(`hymns_${language}`);
+    const hymns = await collection.find({}).toArray();
+    res.json(hymns);
+  } catch (error) {
+    console.error('Error fetching hymns:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/hymns/:language/:number', async (req, res) => {
+  try {
+    const { language, number } = req.params;
+    const collection = db.collection(`hymns_${language}`);
+    const hymn = await collection.findOne({ number: number });
+    
+    if (!hymn) {
+      return res.status(404).json({ error: 'Hymn not found' });
+    }
+    
+    res.json(hymn);
+  } catch (error) {
+    console.error('Error fetching hymn:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/hymns/:language/id/:id', async (req, res) => {
+  try {
+    const { language, id } = req.params;
+    const collection = db.collection(`hymns_${language}`);
+    
+    // Try with MongoDB ObjectId if it looks like one
+    let hymn;
+    if (/^[0-9a-fA-F]{24}$/.test(id)) {
+      const ObjectId = require('mongodb').ObjectId;
+      hymn = await collection.findOne({ _id: new ObjectId(id) });
+    }
+    
+    // If not found with ObjectId, try with string id
+    if (!hymn) {
+      hymn = await collection.findOne({ _id: id });
+    }
+    
+    if (!hymn) {
+      return res.status(404).json({ error: 'Hymn not found' });
+    }
+    
+    res.json(hymn);
+  } catch (error) {
+    console.error('Error fetching hymn by id:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/search', async (req, res) => {
+  try {
+    const { query, language } = req.query;
+    
+    if (!query || !language) {
+      return res.status(400).json({ error: 'Missing query or language parameter' });
+    }
+    
+    const collection = db.collection(`hymns_${language}`);
+    const results = await collection.find({
+      $or: [
+        { title: { $regex: query, $options: 'i' } },
+        { markdown: { $regex: query, $options: 'i' } },
+        { number: { $regex: query, $options: 'i' } }
+      ]
+    }).toArray();
+    
+    res.json(results);
+  } catch (error) {
+    console.error('Error searching hymns:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/hymns/:language', async (req, res) => {
+  try {
+    const { language } = req.params;
+    const hymn = req.body;
+    const collection = db.collection(`hymns_${language}`);
+    
+    const { _id, ...hymnWithoutId } = hymn;
+    
+    if (_id) {
+      // Update existing hymn
+      let objectId = _id;
+      if (/^[0-9a-fA-F]{24}$/.test(_id)) {
+        const ObjectId = require('mongodb').ObjectId;
+        objectId = new ObjectId(_id);
+      }
+      
+      await collection.updateOne(
+        { _id: objectId },
+        { $set: hymnWithoutId }
+      );
+    } else {
+      // Insert new hymn
+      const id = `${language}-${hymn.number}`;
+      await collection.insertOne({
+        ...hymnWithoutId,
+        _id: id,
+        id: id
+      });
+    }
+    
+    res.json({ message: 'Hymn saved successfully' });
+  } catch (error) {
+    console.error('Error saving hymn:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+```
+
+2. Modify your .env file to include:
+
+```
+MONGO_URI=mongodb://localhost:27017/hymns_db
+PORT=3001
+```
+
+3. Run the server with:
+
+```bash
+node server.js
+```
+
+4. Configure the client application to use mock data during development by setting `useMockData: true` in `src/services/serviceConfig.ts`. For production, set it to `false` to use the real API.
+
+## Notes
+
+- The server should be run separately from the client application
+- Make sure MongoDB is running before starting the server
+- For production deployment, consider using a process manager like PM2

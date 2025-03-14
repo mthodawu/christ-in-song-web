@@ -1,5 +1,8 @@
 
-import { MongoClient, Db, Collection, ObjectId } from "mongodb";
+// NOTE: This file is intended for SERVER-SIDE USE ONLY
+// It should NOT be imported directly in client-side code
+
+import { MongoClient, Db, Collection, ObjectId, Filter, Document } from "mongodb";
 import { Language } from "@/types/hymn";
 
 let client: MongoClient | null = null;
@@ -13,6 +16,7 @@ export const initMongoDB = async (connectionString: string): Promise<void> => {
     client = new MongoClient(connectionString);
     await client.connect();
     db = client.db("hymns_db");
+    console.log("MongoDB connected successfully");
   } catch (error) {
     console.error("Failed to connect to MongoDB:", error);
     throw error;
@@ -32,20 +36,29 @@ export const closeMongoDB = async (): Promise<void> => {
   }
 };
 
+// Helper function to safely convert ID strings to ObjectId
+export const toObjectId = (id: string): ObjectId | string => {
+  try {
+    if (/^[0-9a-fA-F]{24}$/.test(id)) {
+      return new ObjectId(id);
+    }
+    return id;
+  } catch (error) {
+    console.error("Error converting to ObjectId:", error);
+    return id;
+  }
+};
+
 export function findById(collection: string, id: string) {
   const db = getDb();
   try {
     // Try to convert to ObjectId if it looks like a MongoDB ObjectId
-    if (/^[0-9a-fA-F]{24}$/.test(id)) {
-      return db.collection(collection).findOne({ _id: new ObjectId(id) });
-    } else {
-      // If not a valid ObjectId format, search by string ID
-      return db.collection(collection).findOne({ _id: new ObjectId(id) });
-    }
+    const objectId = toObjectId(id);
+    return db.collection(collection).findOne({ _id: objectId });
   } catch (error) {
     console.error("Error finding by ID:", error);
     // Fallback to string ID
-    return db.collection(collection).findOne({ _id: new ObjectId(id) });
+    return db.collection(collection).findOne({ _id: id });
   }
 }
 
@@ -61,17 +74,11 @@ export const getHymnsByLanguage = async (language: Language) => {
 export const getHymnById = async (language: Language, id: string) => {
   const collection = getHymnsCollection(language);
   try {
-    // Try to convert to ObjectId if it looks like a MongoDB ObjectId
-    if (/^[0-9a-fA-F]{24}$/.test(id)) {
-      return collection.findOne({ _id: new ObjectId(id) });
-    } else {
-      // If not a valid ObjectId format, search by string ID
-      return collection.findOne({ _id: new ObjectId(id) });
-    }
+    const objectId = toObjectId(id);
+    return collection.findOne({ _id: objectId });
   } catch (error) {
     console.error("Error finding hymn by ID:", error);
-    // Fallback to string ID
-    return collection.findOne({ _id: new ObjectId(id) });
+    return collection.findOne({ _id: id });
   }
 };
 
@@ -97,8 +104,9 @@ export const saveHymn = async (language: Language, hymn: any) => {
   
   if (_id) {
     // Update existing hymn
+    const objectId = toObjectId(_id.toString());
     await collection.updateOne(
-      { _id: _id },
+      { _id: objectId },
       { $set: hymnWithoutId }
     );
     return { ...hymn, _id };
@@ -136,6 +144,8 @@ export const setupCollections = async (
 
     // Load initial data from JSON
     try {
+      // Note: In a server environment, we would use fs.readFile instead of fetch
+      // This will need to be addressed in the server implementation
       const response = await fetch(`/data/${language.toLowerCase()}.json`);
       const hymns = await response.json();
 

@@ -41,7 +41,7 @@ export const getHymnByNumber = async (language: Language, number: string): Promi
   }
 };
 
-export const getHymnById = async (id: string, language: Language): Promise<Hymn | null> => {
+export const getHymnById = async (language: Language, id: string): Promise<Hymn | null> => {
   try {
     const response = await apiService.fetchData<Hymn>(`hymns/${language}/id/${id}`);
     if (response.error || !response.data) {
