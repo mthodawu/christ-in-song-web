@@ -7,7 +7,7 @@ import { HymnProvider } from './context/HymnContext.tsx';
 import hymnService from './services/hymnService.ts';
 
 // MongoDB connection string - in a real app, this would come from environment variables
-const MONGODB_URI = 'mongodb+srv://yourusername:yourpassword@yourcluster.mongodb.net/hymns_db?retryWrites=true&w=majority';
+const MONGODB_URI = 'mongodb+srv://mthodawu:jTmYqy2s1e4o9ySa@tutortrackdb.7ndm2.mongodb.net/';
 
 // Initialize the app and connect to MongoDB
 const initApp = async () => {
