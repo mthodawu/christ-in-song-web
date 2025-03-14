@@ -1,5 +1,5 @@
 
-import { MongoClient, Db, Collection, ObjectId, ObjectId } from 'mongodb';
+import { MongoClient, Db, Collection, ObjectId } from 'mongodb';
 import { Hymn, Language } from '@/types/hymn';
 import { toast } from 'sonner';
 
