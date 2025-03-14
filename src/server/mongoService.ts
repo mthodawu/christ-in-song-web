@@ -1,8 +1,11 @@
-import { MongoClient, Db, ObjectId, Collection } from "mongodb";
+
+import { MongoClient, Db, Collection } from "mongodb";
 import { Language } from "@/types/hymn";
 
 let client: MongoClient | null = null;
 let db: Db | null = null;
+
+export const HYMNS_COLLECTION_PREFIX = "hymns_";
 
 export const initMongoDB = async (connectionString: string): Promise<void> => {
   try {
@@ -29,12 +32,10 @@ export const closeMongoDB = async (): Promise<void> => {
   }
 };
 
-export async function findById(collection: string, id: string) {
+export function findById(collection: string, id: string) {
   const db = getDb();
-  return db.collection(collection).findOne({ _id: new ObjectId(id) });
+  return db.collection(collection).findOne({ _id: id });
 }
-
-export const HYMNS_COLLECTION_PREFIX = "hymns_";
 
 export const getHymnsCollection = (language: Language): Collection => {
   return getDb().collection(`${HYMNS_COLLECTION_PREFIX}${language}`);
@@ -47,7 +48,7 @@ export const getHymnsByLanguage = async (language: Language) => {
 
 export const getHymnById = async (language: Language, id: string) => {
   const collection = getHymnsCollection(language);
-  return collection.findOne({ _id: new ObjectId(id)  });
+  return collection.findOne({ _id: id });
 };
 
 export const getHymnByNumber = async (language: Language, number: string) => {
