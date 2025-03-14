@@ -1,5 +1,5 @@
 
-import { MongoClient, Db, Collection } from 'mongodb';
+import { MongoClient, Db, Collection, ObjectId } from 'mongodb';
 import { Hymn, Language } from '@/types/hymn';
 import { toast } from 'sonner';
 
@@ -110,7 +110,7 @@ export const getHymnById = async (id: string, language: Language): Promise<Hymn 
   
   try {
     const collection = getHymnsCollection(language);
-    const hymn = await collection.findOne({ _id: id });
+    const hymn = await collection.findOne({ _id: new ObjectId(id)  });
     
     if (!hymn) return null;
     
@@ -185,7 +185,7 @@ export const saveHymn = async (hymn: Hymn, language: Language): Promise<void> =>
     const id = hymn.id || `${language.toLowerCase()}-${hymn.number}`;
     
     await collection.updateOne(
-      { _id: id },
+      { _id: new ObjectId(id)  },
       { 
         $set: {
           id: id, 
