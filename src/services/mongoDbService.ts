@@ -1,5 +1,5 @@
 
-import { MongoClient, Db, Collection } from 'mongodb';
+import { MongoClient, Db, Collection, ObjectId } from 'mongodb';
 import { Hymn, Language } from '@/types/hymn';
 import { toast } from 'sonner';
 
@@ -110,6 +110,7 @@ export const getHymnById = async (id: string, language: Language): Promise<Hymn 
   
   try {
     const collection = getHymnsCollection(language);
+    // Use _id field with string value (we're using string IDs, not ObjectIds)
     const hymn = await collection.findOne({ _id: id });
     
     if (!hymn) return null;
