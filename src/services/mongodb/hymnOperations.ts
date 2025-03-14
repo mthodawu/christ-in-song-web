@@ -2,6 +2,7 @@
 import { Hymn, Language } from '@/types/hymn';
 import { getHymnsCollection } from './collections';
 import { toast } from 'sonner';
+import { ObjectId } from 'mongodb';
 
 /**
  * Get all hymns for a language
@@ -30,7 +31,7 @@ export const getHymnById = async (id: string, language: Language): Promise<Hymn 
   try {
     const collection = getHymnsCollection(language);
     // Use string ID directly since we store string IDs, not ObjectIds
-    const hymn = await collection.findOne({ _id: id });
+    const hymn = await collection.findOne({ _id: new ObjectId(id)  });
     
     if (!hymn) return null;
     
@@ -105,7 +106,7 @@ export const saveHymn = async (hymn: Hymn, language: Language): Promise<void> =>
     const id = hymn.id || `${language.toLowerCase()}-${hymn.number}`;
     
     await collection.updateOne(
-      { _id: id },
+      { _id: new ObjectId(id)  },
       { 
         $set: {
           id: id, 
