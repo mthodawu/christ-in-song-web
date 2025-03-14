@@ -41,6 +41,22 @@ export const getHymnByNumber = async (language: Language, number: string): Promi
   }
 };
 
+export const getHymnById = async (id: string, language: Language): Promise<Hymn | null> => {
+  try {
+    const response = await apiService.fetchData<Hymn>(`hymns/${language}/id/${id}`);
+    if (response.error || !response.data) {
+      return null;
+    }
+    return {
+      ...response.data,
+      verses: processMarkdownToVerses(response.data.markdown)
+    };
+  } catch (error) {
+    console.error('Error fetching hymn by id:', error);
+    return null;
+  }
+};
+
 export const searchHymns = async (query: string, primaryLanguage: Language = "english"): Promise<Hymn[]> => {
   try {
     const response = await apiService.fetchData<Hymn[]>(`search?query=${encodeURIComponent(query)}&language=${primaryLanguage}`);
@@ -53,6 +69,20 @@ export const searchHymns = async (query: string, primaryLanguage: Language = "en
     }));
   } catch (error) {
     console.error('Error searching hymns:', error);
+    return [];
+  }
+};
+
+export const searchHymnsAcrossLanguages = async (query: string, primaryLanguage: Language = "english"): Promise<Array<Hymn & { language: Language }>> => {
+  try {
+    // For now we'll just search the primary language and add the language property
+    const results = await searchHymns(query, primaryLanguage);
+    return results.map(hymn => ({
+      ...hymn,
+      language: primaryLanguage
+    }));
+  } catch (error) {
+    console.error('Error searching hymns across languages:', error);
     return [];
   }
 };
@@ -79,6 +109,8 @@ export default {
   availableLanguages,
   getAllHymnsForLanguage,
   getHymnByNumber,
+  getHymnById,
   searchHymns,
+  searchHymnsAcrossLanguages,
   saveHymn
 };

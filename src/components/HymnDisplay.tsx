@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ArrowLeft, Edit, X, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowLeft, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import HymnEditForm from '@/components/HymnEditForm';
 import { useHymn } from '@/context/HymnContext';
@@ -32,8 +31,7 @@ const HymnDisplay = ({ hymn: initialHymn }: HymnDisplayProps) => {
     if (isDualMode && secondaryLanguage && hymn.number) {
       const fetchSecondaryHymn = async () => {
         try {
-          const secondaryId = `${secondaryLanguage.toLowerCase()}-${hymn.number}`;
-          const hymnData = await hymnService.getHymnById(secondaryId, secondaryLanguage);
+          const hymnData = await hymnService.getHymnByNumber(secondaryLanguage, hymn.number.toString());
           setSecondaryHymn(hymnData);
         } catch (error) {
           console.error('Failed to load secondary hymn:', error);
@@ -61,7 +59,6 @@ const HymnDisplay = ({ hymn: initialHymn }: HymnDisplayProps) => {
     }, []);
 
     if (!isDualMode || !secondaryHymn || !secondaryHymn.verses || !secondaryHymn.verses[currentVerse]) {
-      // If not in dual mode or no secondary verse, just display primary lines
       setFormattedVerses(primaryLines.map((line, i) => (
         <div key={`primary-${i}`} className="mb-4">{line}</div>
       )));
@@ -76,19 +73,16 @@ const HymnDisplay = ({ hymn: initialHymn }: HymnDisplayProps) => {
       return acc;
     }, []);
 
-    // Create alternating lines of primary and secondary content
     const alternatingLines: React.ReactNode[] = [];
     const maxLines = Math.max(primaryLines.length, secondaryLines.length);
 
     for (let i = 0; i < maxLines; i++) {
-      // Add primary line if available
       if (primaryLines[i]) {
         alternatingLines.push(
           <div key={`primary-${i}`} className="mb-2">{primaryLines[i]}</div>
         );
       }
 
-      // Add secondary line if available
       if (secondaryLines[i]) {
         alternatingLines.push(
           <div 

@@ -1,5 +1,5 @@
 
-import { MongoClient, Db, Collection } from "mongodb";
+import { MongoClient, Db, Collection, ObjectId } from "mongodb";
 import { Language } from "@/types/hymn";
 
 let client: MongoClient | null = null;
@@ -34,7 +34,19 @@ export const closeMongoDB = async (): Promise<void> => {
 
 export function findById(collection: string, id: string) {
   const db = getDb();
-  return db.collection(collection).findOne({ _id: id });
+  try {
+    // Try to convert to ObjectId if it looks like a MongoDB ObjectId
+    if (/^[0-9a-fA-F]{24}$/.test(id)) {
+      return db.collection(collection).findOne({ _id: new ObjectId(id) });
+    } else {
+      // If not a valid ObjectId format, search by string ID
+      return db.collection(collection).findOne({ _id: id });
+    }
+  } catch (error) {
+    console.error("Error finding by ID:", error);
+    // Fallback to string ID
+    return db.collection(collection).findOne({ _id: id });
+  }
 }
 
 export const getHymnsCollection = (language: Language): Collection => {
@@ -48,7 +60,19 @@ export const getHymnsByLanguage = async (language: Language) => {
 
 export const getHymnById = async (language: Language, id: string) => {
   const collection = getHymnsCollection(language);
-  return collection.findOne({ _id: id });
+  try {
+    // Try to convert to ObjectId if it looks like a MongoDB ObjectId
+    if (/^[0-9a-fA-F]{24}$/.test(id)) {
+      return collection.findOne({ _id: new ObjectId(id) });
+    } else {
+      // If not a valid ObjectId format, search by string ID
+      return collection.findOne({ _id: id });
+    }
+  } catch (error) {
+    console.error("Error finding hymn by ID:", error);
+    // Fallback to string ID
+    return collection.findOne({ _id: id });
+  }
 };
 
 export const getHymnByNumber = async (language: Language, number: string) => {
