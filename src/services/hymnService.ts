@@ -1,6 +1,6 @@
 
 import { Language, Hymn } from "@/types/hymn";
-import * as dbService from './databaseService';
+import * as mongoDbService from './mongoDbService';
 import { processMarkdownToVerses } from './verseService';
 
 export const availableLanguages: Language[] = [
@@ -21,15 +21,16 @@ export const availableLanguages: Language[] = [
 ];
 
 // Initialize the database when the app starts
-export const initializeHymnService = async (): Promise<void> => {
-  await dbService.initDatabase();
+export const initializeHymnService = async (mongoDbUri: string): Promise<void> => {
+  await mongoDbService.initMongoDB(mongoDbUri);
+  await mongoDbService.setupCollections(availableLanguages);
 };
 
 export const getAllHymnsForLanguage = async (
   language: Language
 ): Promise<Hymn[]> => {
   try {
-    const hymns = dbService.getHymnsByLanguage(language);
+    const hymns = await mongoDbService.getHymnsByLanguage(language);
     return hymns.map(hymn => ({
       ...hymn,
       verses: processMarkdownToVerses(hymn.markdown),
@@ -45,7 +46,7 @@ export const getHymnById = async (
   language: Language
 ): Promise<Hymn | null> => {
   try {
-    const hymn = dbService.getHymnById(id, language);
+    const hymn = await mongoDbService.getHymnById(id, language);
     
     if (!hymn) {
       // If not found and the ID might contain a hymn number, try to find by number
@@ -54,7 +55,7 @@ export const getHymnById = async (
         if (hymnNumberStr) {
           const hymnNumber = parseInt(hymnNumberStr, 10);
           if (!isNaN(hymnNumber)) {
-            const hymnByNumber = dbService.getHymnByNumber(hymnNumber, language);
+            const hymnByNumber = await mongoDbService.getHymnByNumber(hymnNumber, language);
             if (hymnByNumber) {
               return {
                 ...hymnByNumber,
@@ -82,7 +83,7 @@ export const getHymnByNumber = async (
   language: Language
 ): Promise<Hymn | null> => {
   try {
-    const hymn = dbService.getHymnByNumber(number, language);
+    const hymn = await mongoDbService.getHymnByNumber(number, language);
     if (!hymn) return null;
     
     return {
@@ -103,27 +104,27 @@ export const searchHymnsAcrossLanguages = async (
 
   try {
     // Search in primary language first
-    const primaryResults = dbService.searchHymns(query, primaryLanguage)
-      .map(hymn => ({
-        ...hymn,
-        verses: processMarkdownToVerses(hymn.markdown),
-        language: primaryLanguage
-      }));
+    const primaryResults = await mongoDbService.searchHymns(query, primaryLanguage);
+    const processedPrimaryResults = primaryResults.map(hymn => ({
+      ...hymn,
+      verses: processMarkdownToVerses(hymn.markdown),
+      language: primaryLanguage
+    }));
     
-    results.push(...primaryResults);
+    results.push(...processedPrimaryResults);
 
     // Then search in other languages
     for (const language of availableLanguages) {
       if (language === primaryLanguage) continue;
 
-      const languageResults = dbService.searchHymns(query, language)
-        .map(hymn => ({
-          ...hymn,
-          verses: processMarkdownToVerses(hymn.markdown),
-          language
-        }));
+      const languageResults = await mongoDbService.searchHymns(query, language);
+      const processedLanguageResults = languageResults.map(hymn => ({
+        ...hymn,
+        verses: processMarkdownToVerses(hymn.markdown),
+        language
+      }));
 
-      results.push(...languageResults);
+      results.push(...processedLanguageResults);
     }
   } catch (error) {
     console.error('Error searching hymns:', error);
@@ -134,7 +135,7 @@ export const searchHymnsAcrossLanguages = async (
 
 export const saveHymn = async (hymn: Hymn, language: Language): Promise<void> => {
   try {
-    dbService.saveHymn(hymn, language);
+    await mongoDbService.saveHymn(hymn, language);
   } catch (error) {
     console.error('Failed to save hymn:', error);
     throw error;
