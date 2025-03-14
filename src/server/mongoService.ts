@@ -1,17 +1,138 @@
+import { MongoClient, Db, ObjectId, Collection } from "mongodb";
+import { Language } from "@/types/hymn";
 
-import { MongoClient, ObjectId } from 'mongodb';
+let client: MongoClient | null = null;
+let db: Db | null = null;
 
-const uri = process.env.MONGODB_URI!;
-const client = new MongoClient(uri);
-
-export async function connectDB() {
-  if (!client.connect()) {
+export const initMongoDB = async (connectionString: string): Promise<void> => {
+  try {
+    if (client) return;
+    client = new MongoClient(connectionString);
     await client.connect();
+    db = client.db("hymns_db");
+  } catch (error) {
+    console.error("Failed to connect to MongoDB:", error);
+    throw error;
   }
-  return client.db();
-}
+};
+
+export const getDb = (): Db => {
+  if (!db) throw new Error("MongoDB not initialized");
+  return db;
+};
+
+export const closeMongoDB = async (): Promise<void> => {
+  if (client) {
+    await client.close();
+    client = null;
+    db = null;
+  }
+};
 
 export async function findById(collection: string, id: string) {
-  const db = await connectDB();
-  return db.collection(collection).findOne({ _id: new ObjectId(id)  });
+  const db = getDb();
+  return db.collection(collection).findOne({ _id: new ObjectId(id) });
 }
+
+export const HYMNS_COLLECTION_PREFIX = "hymns_";
+
+export const getHymnsCollection = (language: Language): Collection => {
+  return getDb().collection(`${HYMNS_COLLECTION_PREFIX}${language}`);
+};
+
+export const getHymnsByLanguage = async (language: Language) => {
+  const collection = getHymnsCollection(language);
+  return collection.find({}).toArray();
+};
+
+export const getHymnById = async (language: Language, id: string) => {
+  const collection = getHymnsCollection(language);
+  return collection.findOne({ _id: new ObjectId(id)  });
+};
+
+export const getHymnByNumber = async (language: Language, number: string) => {
+  const collection = getHymnsCollection(language);
+  return collection.findOne({ number: number });
+};
+
+export const searchHymns = async (language: Language, query: string) => {
+  const collection = getHymnsCollection(language);
+  return collection.find({
+    $or: [
+      { title: { $regex: query, $options: 'i' } },
+      { markdown: { $regex: query, $options: 'i' } },
+      { number: { $regex: query, $options: 'i' } }
+    ]
+  }).toArray();
+};
+
+export const saveHymn = async (language: Language, hymn: any) => {
+  const collection = getHymnsCollection(language);
+  const { _id, ...hymnWithoutId } = hymn;
+  
+  if (_id) {
+    // Update existing hymn
+    await collection.updateOne(
+      { _id: _id },
+      { $set: hymnWithoutId }
+    );
+    return { ...hymn, _id };
+  } else {
+    // Insert new hymn
+    const id = `${language.toLowerCase()}-${hymn.number}`;
+    const result = await collection.insertOne({
+      ...hymnWithoutId,
+      _id: id,
+      id: id
+    });
+    return { ...hymn, _id: result.insertedId };
+  }
+};
+
+export const setupCollections = async (
+  languages: Language[]
+): Promise<void> => {
+  const db = getDb();
+
+  // Check if collections already exist
+  const collections = await db.listCollections().toArray();
+  const existingCollections = collections.map((c) => c.name);
+
+  for (const language of languages) {
+    const collectionName = `${HYMNS_COLLECTION_PREFIX}${language}`;
+
+    // Skip if collection already exists
+    if (existingCollections.includes(collectionName)) {
+      continue;
+    }
+
+    // Create collection for this language
+    await db.createCollection(collectionName);
+
+    // Load initial data from JSON
+    try {
+      const response = await fetch(`/data/${language.toLowerCase()}.json`);
+      const hymns = await response.json();
+
+      // Insert initial data with proper MongoDB _id
+      const formattedHymns = hymns.map((hymn: any) => {
+        const id = hymn.id || `${language.toLowerCase()}-${hymn.number}`;
+        return {
+          _id: id,
+          id: id,
+          number: hymn.number,
+          title: hymn.title,
+          markdown: hymn.markdown,
+        };
+      });
+
+      // Insert data if there are hymns
+      if (formattedHymns.length > 0) {
+        await getHymnsCollection(language).insertMany(formattedHymns);
+        console.log(`Loaded ${formattedHymns.length} hymns for ${language}`);
+      }
+    } catch (error) {
+      console.error(`Failed to load initial data for ${language}:`, error);
+    }
+  }
+};

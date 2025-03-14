@@ -1,4 +1,3 @@
-
 import type { Document } from 'mongodb';
 
 export interface ApiResponse<T> {
@@ -36,3 +35,21 @@ export const apiService = {
     }
   }
 };
+
+const API_BASE_URL = '/api';
+
+export async function fetchFromCollection(collection: string, id: string) {
+  const response = await fetch(`${API_BASE_URL}/${collection}/${id}`);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function getAllFromCollection(collection: string) {
+  const response = await fetch(`${API_BASE_URL}/${collection}`);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+}
