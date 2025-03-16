@@ -8,6 +8,7 @@ import { HymnProvider } from "@/context/HymnContext";
 import Index from "./pages/Index";
 import HymnPage from "./pages/HymnPage";
 import NotFound from "./pages/NotFound";
+import axios from "axios";
 
 const queryClient = new QueryClient();
 
