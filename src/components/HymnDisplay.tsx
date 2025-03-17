@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowLeft, Edit } from 'lucide-react';
@@ -53,12 +52,7 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
     }
 
     const currentPrimaryVerse = currentHymn.verses[currentVerse].content;
-    const primaryLines = currentPrimaryVerse.split(' ').reduce((acc: string[], word: string, index: number) => {
-      const lineIndex = Math.floor(index / 6);
-      if (!acc[lineIndex]) acc[lineIndex] = '';
-      acc[lineIndex] += (acc[lineIndex] ? ' ' : '') + word;
-      return acc;
-    }, []);
+    const primaryLines = currentPrimaryVerse.split('\n');
 
     if (!isDualMode || !secondaryHymn || !secondaryHymn.verses || !secondaryHymn.verses[currentVerse]) {
       // If not in dual mode or no secondary verse, just display primary lines
@@ -69,12 +63,7 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
     }
 
     const secondaryVerseContent = secondaryHymn.verses[currentVerse].content;
-    const secondaryLines = secondaryVerseContent.split(' ').reduce((acc: string[], word: string, index: number) => {
-      const lineIndex = Math.floor(index / 6);
-      if (!acc[lineIndex]) acc[lineIndex] = '';
-      acc[lineIndex] += (acc[lineIndex] ? ' ' : '') + word;
-      return acc;
-    }, []);
+    const secondaryLines = secondaryVerseContent.split('\n');
 
     // Create alternating lines of primary and secondary content
     const alternatingLines: React.ReactNode[] = [];
@@ -93,7 +82,7 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
         alternatingLines.push(
           <div 
             key={`secondary-${i}`} 
-            className="mb-4 text-emerald-600 dark:text-emerald-400 italic"
+            className="mb-4 text-primary dark:text-yellow-400 italic"
           >
             [{secondaryLines[i]}]
           </div>
@@ -145,10 +134,10 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
       </header>
 
       <main className="flex-1 flex items-center justify-center p-4">
-        <div className="max-w-4xl w-full space-y-4 verse-transition">
+        <div className=" w-full space-y-4 verse-transition">
           <div className={cn(
             "hymn-text text-center",
-            isDualMode && "text-left"
+            isDualMode && "text-center"
           )}>
             {formattedVerses}
           </div>
@@ -160,7 +149,7 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
       </main>
 
       <footer className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t">
-        <div className="max-w-4xl mx-auto p-4 flex justify-between items-center">
+        <div className="max-w-5xl mx-auto p-4 flex justify-between items-center">
           <Button
             variant="outline"
             onClick={() => hasPrevVerse && setCurrentVerse(currentVerse - 1)}

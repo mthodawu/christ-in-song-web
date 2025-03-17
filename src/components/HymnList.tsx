@@ -26,7 +26,7 @@ const HymnList = () => {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4">      
+    <div className="w-full max-w-5xl mx-auto px-4">      
       <div className="space-y-2">
         {displayHymns.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">

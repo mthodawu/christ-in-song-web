@@ -47,7 +47,7 @@ const loadHymnsForLanguage = async (language: Language): Promise<Hymn[]> => {
 
 const processMarkdownToVerses = (
   markdown: string
-): { number: number; content: string }[] => {
+): { number?: number; content: string }[] => {
   if (!markdown) return [];
 
   const lines = markdown.split("\n");
@@ -56,52 +56,50 @@ const processMarkdownToVerses = (
   let chorus = "";
   let verseNumber = 1;
   let isChorus = false;
-  let hasChorus = false;
 
   for (const line of lines) {
-    const trimmedLine = line.trim();
+    const trimmedLine = line;
+    
     if (trimmedLine === "" && currentVerse !== "") {
-      if (verseNumber == 2 && isChorus) {
-        verseNumber++;
-        verses.push({ content: chorus });
-        console.log("VerseNumber: ", verseNumber )
-        chorus = "";
-      }
-      if (!isChorus && chorus !== "" && verseNumber !== 2) {
+      if (isChorus) {
+        // Store chorus for later use
+        chorus = currentVerse.trim();
         verses.push({ number: verseNumber++, content: currentVerse.trim() });
-        console.log("VerseNumber: ", verseNumber, "verse+: ", currentVerse)
-        verses.push({ content: chorus });
-        console.log("VerseNumber: ", verseNumber, "chorus: ", chorus)
-      }
-      else {
+      } else {
+        // Add verse
         verses.push({ number: verseNumber++, content: currentVerse.trim() });
-        console.log("VerseNumber: ", verseNumber, "verse: ", currentVerse)
+        // Add chorus after each verse if we have one
+        if (chorus) {
+          verses.push({ content: chorus });
+        }
       }
       currentVerse = "";
       isChorus = false;
-    } else if (trimmedLine.startsWith("**CHORUS:**")) {
+    } else if (trimmedLine.startsWith("  **CHORUS:**")) {
       isChorus = true;
-      currentVerse += trimmedLine.replace("**CHORUS:**", "Chorus: ");
+      currentVerse += trimmedLine.replace("  **CHORUS:**", "Chorus: ");
     } else if (
       !trimmedLine.startsWith("###") &&
       !trimmedLine.startsWith("**CHORUS:**") &&
       !trimmedLine.startsWith("Verse") &&
       !trimmedLine.startsWith("**") &&
       !trimmedLine.startsWith("Chorus") &&
-      !/^\d+\./.test(trimmedLine) // Ignore lines starting with a number followed by a dot
+      !(trimmedLine === "") &&
+      !/^\d+\./.test(trimmedLine)
     ) {
-      currentVerse += trimmedLine + "\n";
-      if (isChorus) {
-        chorus = currentVerse.trim();
-        hasChorus = true;
-      }
+      // Add the line with a line break
+      currentVerse += (currentVerse ? "\n" : "") + trimmedLine;
     }
   }
 
+  // Handle last verse
   if (currentVerse !== "") {
-    console.log("VerseNumber: ", verseNumber++, "verse--: ", currentVerse)
-    verses.push({ number: verseNumber, content: currentVerse.trim() });
-    verses.push({ content: chorus });
+    if (!isChorus) {
+      verses.push({ number: verseNumber, content: currentVerse.trim() });
+      if (chorus) {
+        verses.push({ content: chorus });
+      }
+    }
   }
 
   return verses;

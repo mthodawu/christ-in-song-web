@@ -4,7 +4,11 @@ const hymnSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    default: function() {
+      // Generate id using language-number format
+      return `${this.constructor.modelName.toLowerCase()}-${this.number}`;
+    }
   },
   title: {
     type: String,

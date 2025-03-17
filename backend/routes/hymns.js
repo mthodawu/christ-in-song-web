@@ -51,11 +51,14 @@ router.put('/:language/:id', async (req, res) => {
         message: `Hymn number ${hymnNumber} not found in ${language} hymnal` 
       });
     }
-    
+
+    // Ensure hymn.id is set
+    hymn.id = `${language}-${hymnNumber}`;
+
     // Track changes before updating
     if (title !== hymn.title) {
       await new Change({
-        hymnId: hymn.id,
+        hymnId: hymn.id || `${language}-${hymnNumber}`,
         language,
         fieldChanged: 'title',
         oldValue: hymn.title,

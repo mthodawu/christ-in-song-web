@@ -34,7 +34,7 @@ const Navigation = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-b z-10">
-      <div className="max-w-4xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center gap-2">
+      <div className="max-w-5xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
