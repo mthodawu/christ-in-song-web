@@ -1,6 +1,8 @@
+
 const express = require('express');
 const router = express.Router();
 const { getModelForLanguage } = require('../models/Hymn');
+const Change = require('../models/Change');
 
 // GET /hymns/:language - Get all hymns for a language
 router.get('/:language', async (req, res) => {
@@ -28,6 +30,54 @@ router.get('/:language/:id', async (req, res) => {
         message: `Hymn number ${hymnNumber} not found in ${language} hymnal` 
       });
     }
+    res.json(hymn);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// PUT /hymns/:language/:id - Update a specific hymn
+router.put('/:language/:id', async (req, res) => {
+  try {
+    const language = req.params.language.toLowerCase();
+    const [, hymnNumber] = req.params.id.split('-');
+    const { title, markdown } = req.body;
+    
+    const HymnModel = getModelForLanguage(language);
+    const hymn = await HymnModel.findOne({ number: Number(hymnNumber) });
+    
+    if (!hymn) {
+      return res.status(404).json({ 
+        message: `Hymn number ${hymnNumber} not found in ${language} hymnal` 
+      });
+    }
+    
+    // Track changes before updating
+    if (title !== hymn.title) {
+      await new Change({
+        hymnId: hymn.id,
+        language,
+        fieldChanged: 'title',
+        oldValue: hymn.title,
+        newValue: title
+      }).save();
+      hymn.title = title;
+    }
+    
+    if (markdown !== hymn.markdown) {
+      await new Change({
+        hymnId: hymn.id,
+        language,
+        fieldChanged: 'markdown',
+        oldValue: hymn.markdown,
+        newValue: markdown
+      }).save();
+      hymn.markdown = markdown;
+    }
+    
+    // Save the updated hymn
+    await hymn.save();
+    
     res.json(hymn);
   } catch (error) {
     res.status(500).json({ message: error.message });

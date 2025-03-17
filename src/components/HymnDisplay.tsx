@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowLeft, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useHymn } from '@/context/HymnContext';
 import hymnService from '@/services/hymnService';
 import { cn } from '@/lib/utils';
 import type { Hymn } from '@/types/hymn';
+import EditHymnDialog from './EditHymnDialog';
 
 interface HymnDisplayProps {
   hymn: Hymn;
@@ -18,13 +19,20 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
   const navigate = useNavigate();
   const [secondaryHymn, setSecondaryHymn] = useState<Hymn | null>(null);
   const [formattedVerses, setFormattedVerses] = useState<React.ReactNode[]>([]);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [currentHymn, setCurrentHymn] = useState<Hymn>(hymn);
+
+  // Handle hymn update
+  const handleHymnUpdated = (updatedHymn: Hymn) => {
+    setCurrentHymn(updatedHymn);
+  };
 
   // Load secondary language hymn if in dual mode
   useEffect(() => {
-    if (isDualMode && secondaryLanguage && hymn.number) {
+    if (isDualMode && secondaryLanguage && currentHymn.number) {
       const fetchSecondaryHymn = async () => {
         try {
-          const secondaryId = `${secondaryLanguage.toLowerCase()}-${hymn.number}`;
+          const secondaryId = `${secondaryLanguage.toLowerCase()}-${currentHymn.number}`;
           const hymnData = await hymnService.getHymnById(secondaryId, secondaryLanguage);
           setSecondaryHymn(hymnData);
         } catch (error) {
@@ -35,16 +43,16 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
     } else {
       setSecondaryHymn(null);
     }
-  }, [hymn.number, isDualMode, secondaryLanguage]);
+  }, [currentHymn.number, isDualMode, secondaryLanguage]);
 
   // Format verses with alternating lines when in dual mode
   useEffect(() => {
-    if (!hymn.verses || hymn.verses.length === 0) {
+    if (!currentHymn.verses || currentHymn.verses.length === 0) {
       setFormattedVerses([]);
       return;
     }
 
-    const currentPrimaryVerse = hymn.verses[currentVerse].content;
+    const currentPrimaryVerse = currentHymn.verses[currentVerse].content;
     const primaryLines = currentPrimaryVerse.split(' ').reduce((acc: string[], word: string, index: number) => {
       const lineIndex = Math.floor(index / 6);
       if (!acc[lineIndex]) acc[lineIndex] = '';
@@ -94,9 +102,9 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
     }
 
     setFormattedVerses(alternatingLines);
-  }, [hymn.verses, currentVerse, isDualMode, secondaryHymn]);
+  }, [currentHymn.verses, currentVerse, isDualMode, secondaryHymn]);
 
-  if (!hymn.verses || hymn.verses.length === 0) {
+  if (!currentHymn.verses || currentHymn.verses.length === 0) {
     return (
       <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center">
         <p className="text-muted-foreground">No verses available for this hymn.</p>
@@ -108,21 +116,32 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
     );
   }
 
-  const verses = hymn.verses;
+  const verses = currentHymn.verses;
   const hasNextVerse = currentVerse < verses.length - 1;
   const hasPrevVerse = currentVerse > 0;
 
   return (
     <div className="min-h-[calc(100vh-5rem)] flex flex-col">
-      <header className="p-4 flex items-center">
-        <Button variant="ghost" onClick={() => navigate('/')} className="mr-4">
-          <ArrowLeft className="mr-2" />
-          Back to Hymns
-        </Button>
-        <div>
-          <h1 className="text-2xl font-light">{hymn.title}</h1>
-          <p className="text-muted-foreground">Hymn {hymn.number}</p>
+      <header className="p-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <Button variant="ghost" onClick={() => navigate('/')} className="mr-4">
+            <ArrowLeft className="mr-2" />
+            Back to Hymns
+          </Button>
+          <div>
+            <h1 className="text-2xl font-light">{currentHymn.title}</h1>
+            <p className="text-muted-foreground">Hymn {currentHymn.number}</p>
+          </div>
         </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setIsEditDialogOpen(true)}
+          className="ml-auto"
+        >
+          <Edit className="mr-2 h-4 w-4" />
+          Edit Hymn
+        </Button>
       </header>
 
       <main className="flex-1 flex items-center justify-center p-4">
@@ -161,6 +180,14 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
           </Button>
         </div>
       </footer>
+
+      <EditHymnDialog 
+        hymn={currentHymn}
+        language={primaryLanguage}
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        onHymnUpdated={handleHymnUpdated}
+      />
     </div>
   );
 };

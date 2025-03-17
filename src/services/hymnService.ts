@@ -61,20 +61,18 @@ const processMarkdownToVerses = (
   for (const line of lines) {
     const trimmedLine = line.trim();
     if (trimmedLine === "" && currentVerse !== "") {
-      // if (hasChorus) {
       if (verseNumber == 2 && isChorus) {
         verseNumber++;
         verses.push({ content: chorus });
         console.log("VerseNumber: ", verseNumber )
-        // chorus = "";
+        chorus = "";
       }
       if (!isChorus && chorus !== "" && verseNumber !== 2) {
         verses.push({ number: verseNumber++, content: currentVerse.trim() });
-         console.log("VerseNumber: ", verseNumber, "verse+: ", currentVerse)
+        console.log("VerseNumber: ", verseNumber, "verse+: ", currentVerse)
         verses.push({ content: chorus });
         console.log("VerseNumber: ", verseNumber, "chorus: ", chorus)
       }
-      // }
       else {
         verses.push({ number: verseNumber++, content: currentVerse.trim() });
         console.log("VerseNumber: ", verseNumber, "verse: ", currentVerse)
@@ -84,18 +82,14 @@ const processMarkdownToVerses = (
     } else if (trimmedLine.startsWith("**CHORUS:**")) {
       isChorus = true;
       currentVerse += trimmedLine.replace("**CHORUS:**", "Chorus: ");
-      // if(isChorus){
-      //   chorus = currentVerse.trim();
-      //   hasChorus = true;
-      // }
-        } else if (
+    } else if (
       !trimmedLine.startsWith("###") &&
       !trimmedLine.startsWith("**CHORUS:**") &&
       !trimmedLine.startsWith("Verse") &&
       !trimmedLine.startsWith("**") &&
       !trimmedLine.startsWith("Chorus") &&
       !/^\d+\./.test(trimmedLine) // Ignore lines starting with a number followed by a dot
-        ) {
+    ) {
       currentVerse += trimmedLine + "\n";
       if (isChorus) {
         chorus = currentVerse.trim();
@@ -111,6 +105,41 @@ const processMarkdownToVerses = (
   }
 
   return verses;
+};
+
+export const updateHymn = async (
+  id: string,
+  language: Language,
+  title: string,
+  markdown: string
+): Promise<Hymn | null> => {
+  try {
+    console.log(`Updating hymn ${id} in ${language}`);
+    const response = await axios.put(`${API_BASE_URL}/hymns/${language.toLowerCase()}/${id}`, {
+      title,
+      markdown
+    });
+    
+    const updatedHymn = response.data;
+    
+    if (hymnsCache[language]) {
+      const hymnIndex = hymnsCache[language].findIndex(h => h.id === id);
+      if (hymnIndex !== -1) {
+        hymnsCache[language][hymnIndex] = {
+          ...updatedHymn,
+          verses: processMarkdownToVerses(updatedHymn.markdown)
+        };
+      }
+    }
+    
+    return {
+      ...updatedHymn,
+      verses: processMarkdownToVerses(updatedHymn.markdown)
+    };
+  } catch (error) {
+    console.error(`Failed to update hymn with ID ${id}:`, error);
+    return null;
+  }
 };
 
 export const searchHymnsAcrossLanguages = async (
@@ -178,4 +207,5 @@ export default {
   getHymnById,
   getHymnByNumber,
   searchHymnsAcrossLanguages,
+  updateHymn,
 };
