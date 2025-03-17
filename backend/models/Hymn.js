@@ -6,12 +6,12 @@ const hymnSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  number: {
-    type: Number,
-    required: true
-  },
   title: {
     type: String,
+    required: true
+  },
+  number: {
+    type: Number,
     required: true
   },
   markdown: {
@@ -27,7 +27,7 @@ hymnSchema.index({ number: 1 });
 // Function to get model for a specific language
 const getModelForLanguage = (language) => {
   const modelName = `${language}`;
-  return mongoose.models[modelName] || mongoose.model(modelName, hymnSchema);
+  return mongoose.models[modelName] || mongoose.model(modelName, hymnSchema, language);
 };
 
 module.exports = { hymnSchema, getModelForLanguage };

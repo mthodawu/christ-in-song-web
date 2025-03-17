@@ -14,12 +14,32 @@ router.get('/:language', async (req, res) => {
   }
 });
 
-// GET /hymns/search - Search hymns across languages
-router.get('/search', async (req, res) => {
+// GET /hymns/:language/:id - Get a specific hymn by language and ID
+router.get('/:language/:id', async (req, res) => {
   try {
-    const { query, language } = req.query;
-    const searchLanguage = language.toLowerCase();
-    const HymnModel = getModelForLanguage(searchLanguage);
+    const language = req.params.language.toLowerCase();
+    const [, hymnNumber] = req.params.id.split('-');
+    
+    const HymnModel = getModelForLanguage(language);
+    const hymn = await HymnModel.findOne({ number: Number(hymnNumber) });
+    
+    if (!hymn) {
+      return res.status(404).json({ 
+        message: `Hymn number ${hymnNumber} not found in ${language} hymnal` 
+      });
+    }
+    res.json(hymn);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET /hymns/search/:language - Search hymns in a specific language
+router.get('/search/:language', async (req, res) => {
+  try {
+    const { query } = req.query;
+    const language = req.params.language.toLowerCase();
+    const HymnModel = getModelForLanguage(language);
     
     const searchQuery = {
       $or: [
@@ -30,47 +50,7 @@ router.get('/search', async (req, res) => {
     };
 
     const hymns = await HymnModel.find(searchQuery).sort({ number: 1 });
-    res.json(hymns.map(hymn => ({ ...hymn.toObject(), language: searchLanguage })));
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// GET /hymns/id/:id - Get a specific hymn by ID
-router.get('/id/:id', async (req, res) => {
-  try {
-    const { language } = req.query;
-    if (!language) {
-      return res.status(400).json({ message: 'Language parameter is required' });
-    }
-    
-    const HymnModel = getModelForLanguage(language.toLowerCase());
-    const hymn = await HymnModel.findOne({ id: req.params.id });
-    
-    if (!hymn) {
-      return res.status(404).json({ message: 'Hymn not found' });
-    }
-    res.json(hymn);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// GET /hymns/number/:number - Get a hymn by its number
-router.get('/number/:number', async (req, res) => {
-  try {
-    const { language } = req.query;
-    if (!language) {
-      return res.status(400).json({ message: 'Language parameter is required' });
-    }
-
-    const HymnModel = getModelForLanguage(language.toLowerCase());
-    const hymn = await HymnModel.findOne({ number: Number(req.params.number) });
-
-    if (!hymn) {
-      return res.status(404).json({ message: 'Hymn not found' });
-    }
-    res.json(hymn);
+    res.json(hymns.map(hymn => ({ ...hymn.toObject(), language })));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

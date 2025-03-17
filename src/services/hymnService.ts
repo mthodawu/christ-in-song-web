@@ -27,6 +27,7 @@ const loadHymnsForLanguage = async (language: Language): Promise<Hymn[]> => {
   }
 
   try {
+    console.log(`Loading hymns for ${language}... ${API_BASE_URL}/hymns/${language.toLowerCase()}`);
     const response = await axios.get(`${API_BASE_URL}/hymns/${language.toLowerCase()}`);
     const hymns = response.data.map((hymn: any) => ({
       id: hymn.id || `${language.toLowerCase()}-${hymn.number}`,
@@ -117,8 +118,9 @@ export const searchHymnsAcrossLanguages = async (
   primaryLanguage: Language
 ): Promise<Array<Hymn & { language: Language }>> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/hymns/search`, {
-      params: { query, language: primaryLanguage }
+    console.log('Searching hymns across languages with query:', query, 'and primary language:', primaryLanguage);
+    const response = await axios.get(`${API_BASE_URL}/hymns/search/${primaryLanguage.toLowerCase()}`, {
+      params: { query }
     });
     return response.data;
   } catch (error) {
@@ -132,9 +134,8 @@ export const getHymnById = async (
   language: Language
 ): Promise<Hymn | null> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/hymns/id/${id}`, {
-      params: { language }
-    });
+    console.log("getHymnById called with id:", id, "and language:", language);
+    const response = await axios.get(`${API_BASE_URL}/hymns/${language.toLowerCase()}/${id}`);
     const hymn = response.data;
     if (hymn) {
       hymn.verses = processMarkdownToVerses(hymn.markdown);
