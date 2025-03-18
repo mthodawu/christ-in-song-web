@@ -8,6 +8,7 @@ import {
   Rocket,
   Maximize,
   Minimize,
+  PlayCircleIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,6 +87,7 @@ const Navigation = () => {
   const [hymnNumber, setHymnNumber] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [info, setInfo] = useState(false);
+  const [isWatchDemoOpen, setIsWatchDemoOpen] = useState(false);
 
   const handleNumberClick = (num: number) => {
     if (hymnNumber.length < 3) {
@@ -292,13 +294,16 @@ const Navigation = () => {
                   Press <strong>E</strong> to edit hymns on the Hymn page.
                 </p>
                 <p className="text-sm text-muted-foreground -my-1">
-                  Press <strong className="text-lg ">&#8678;</strong> to go to the previous verse..
+                  Press <strong className="text-lg ">&#8678;</strong> to go to
+                  the previous verse..
                 </p>
                 <p className="text-sm text-muted-foreground -mt-2">
-                  Press <strong className="text-lg ">&#8680;</strong> to go to the next verse.
+                  Press <strong className="text-lg ">&#8680;</strong> to go to
+                  the next verse.
                 </p>
               </div>
             </div>
+
             <Accordion type="single" collapsible className="w-full ">
               <AccordionItem value="item-1" className="w-full">
                 <AccordionTrigger className="flex items-center justify-between w-full">
@@ -318,6 +323,41 @@ const Navigation = () => {
                       Creatives to help users easily navigate, and project hymns
                       in multiple languages during worship services.
                     </p>
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-full flex items-center justify-center gap-2 "
+                        onClick={() => setIsWatchDemoOpen(true)}
+                      >
+                        Watch Demo <PlayCircleIcon className="w-4 h-4" />
+                      </Button>
+                      <Dialog
+                        open={isWatchDemoOpen}
+                        onOpenChange={setIsWatchDemoOpen}
+                      >
+                        <DialogContent className="sm:max-w-[600px]">
+                          <DialogHeader>
+                            <DialogTitle>Watch Demo</DialogTitle>
+                            <DialogDescription>
+                              Learn how to use the Christ in Song app
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="aspect-video">
+                            <iframe
+                              width="100%"
+                              height="100%"
+                              src="https://www.youtube.com/embed/62MNc2xODog?si=adRVIwjLrl-dLo4K"
+                              title="YouTube video player"
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              referrerPolicy="strict-origin-when-cross-origin"
+                              allowFullScreen
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </>
+
                     {/* <p className="text-sm text-muted-foreground">
                   Visit us at: <a href="https://ilangacreatives.co.za" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">ilangacreatives.co.za</a>
                 </p> */}
