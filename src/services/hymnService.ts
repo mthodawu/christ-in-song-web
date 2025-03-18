@@ -141,26 +141,6 @@ export const updateHymn = async (
   }
 };
 
-export const searchHymnsAcrossLanguages = async (
-  query: string,
-  primaryLanguage: Language
-): Promise<Array<Hymn & { language: Language }>> => {
-  try {
-    console.log('Searching hymns across languages with query:', query, 'and primary language:', primaryLanguage);
-    const response = await axios.get(`${API_BASE_URL}/hymns/search/${primaryLanguage.toLowerCase()}`, {
-      params: { query }
-    });
-    
-    // Results are already sorted by language with primary language first from the backend
-    return response.data.map((hymn: any) => ({
-      ...hymn,
-      verses: processMarkdownToVerses(hymn.markdown)
-    }));
-  } catch (error) {
-    console.error('Failed to search hymns:', error);
-    return [];
-  }
-};
 
 export const getHymnById = async (
   id: string,
@@ -210,6 +190,6 @@ export default {
   getAllHymnsForLanguage,
   getHymnById,
   getHymnByNumber,
-  searchHymnsAcrossLanguages,
+  // searchHymnsAcrossLanguages,
   updateHymn,
 };

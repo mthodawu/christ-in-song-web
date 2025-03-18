@@ -54,7 +54,7 @@ const Navigation = () => {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="relative flex-1 mx-2 max-w-sm">
+        {/* <div className="relative flex-1 mx-2 max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
@@ -63,7 +63,7 @@ const Navigation = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-        </div>
+        </div> */}
 
         <div className="flex gap-2">
           <Button
