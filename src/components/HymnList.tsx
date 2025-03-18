@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useHymn } from '@/context/HymnContext';
@@ -15,6 +15,7 @@ const HymnList = () => {
   } = useHymn();
   const navigate = useNavigate();
 
+  // If searching, use search results; otherwise, use hymns from primary language
   const displayHymns = searchQuery.trim() ? searchResults : hymns.map(hymn => ({ ...hymn, language: primaryLanguage }));
 
   if (isLoading) {
@@ -46,6 +47,7 @@ const HymnList = () => {
               <div className="flex items-center">
                 <div className="flex-1">
                   <span className="text-xl group-hover:text-primary transition-colors duration-200 block">
+                    <span className="font-semibold mr-2">{hymn.number}.</span>
                     {hymn.title}
                   </span>
                   {hymn.language !== primaryLanguage && (

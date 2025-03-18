@@ -1,8 +1,8 @@
-
 const express = require('express');
 const router = express.Router();
 const { getModelForLanguage } = require('../models/Hymn');
 const Change = require('../models/Change');
+const mongoose = require('mongoose');
 
 // GET /hymns/:language - Get all hymns for a language
 router.get('/:language', async (req, res) => {
@@ -87,24 +87,51 @@ router.put('/:language/:id', async (req, res) => {
   }
 });
 
-// GET /hymns/search/:language - Search hymns in a specific language
+// GET /hymns/search/:language - Search hymns across all languages
 router.get('/search/:language', async (req, res) => {
   try {
     const { query } = req.query;
-    const language = req.params.language.toLowerCase();
-    const HymnModel = getModelForLanguage(language);
+    const primaryLanguage = req.params.language.toLowerCase();
+    const searchResults = [];
     
-    const searchQuery = {
-      $or: [
-        { title: { $regex: query, $options: 'i' } },
-        { markdown: { $regex: query, $options: 'i' } },
-        { number: isNaN(query) ? null : Number(query) }
-      ].filter(condition => condition.number !== null || condition)
-    };
+    // Get list of all collections representing languages
+    const collections = mongoose.connection.collections;
+    const languageCollections = Object.keys(collections).filter(
+      name => name !== 'changes' && name !== 'system.indexes'
+    );
+    
+    // Search each language collection, starting with primary language
+    // This ensures primary language results come first
+    const orderedCollections = [
+      primaryLanguage,
+      ...languageCollections.filter(lang => lang !== primaryLanguage)
+    ];
+    
+    for (const language of orderedCollections) {
+      const HymnModel = getModelForLanguage(language);
+      
+      const searchQuery = {
+        $or: [
+          { title: { $regex: query, $options: 'i' } },
+          { markdown: { $regex: query, $options: 'i' } }
+        ]
+      };
+      
+      // If query is a number, also search by hymn number
+      if (!isNaN(query)) {
+        searchQuery.$or.push({ number: Number(query) });
+      }
 
-    const hymns = await HymnModel.find(searchQuery).sort({ number: 1 });
-    res.json(hymns.map(hymn => ({ ...hymn.toObject(), language })));
+      const languageResults = await HymnModel.find(searchQuery).sort({ number: 1 });
+      searchResults.push(...languageResults.map(hymn => ({ 
+        ...hymn.toObject(), 
+        language 
+      })));
+    }
+    
+    res.json(searchResults);
   } catch (error) {
+    console.error('Search error:', error);
     res.status(500).json({ message: error.message });
   }
 });

@@ -1,3 +1,4 @@
+
 import { Language, Hymn, HymnData } from "@/types/hymn";
 import axios from "axios";
 
@@ -149,7 +150,12 @@ export const searchHymnsAcrossLanguages = async (
     const response = await axios.get(`${API_BASE_URL}/hymns/search/${primaryLanguage.toLowerCase()}`, {
       params: { query }
     });
-    return response.data;
+    
+    // Results are already sorted by language with primary language first from the backend
+    return response.data.map((hymn: any) => ({
+      ...hymn,
+      verses: processMarkdownToVerses(hymn.markdown)
+    }));
   } catch (error) {
     console.error('Failed to search hymns:', error);
     return [];
