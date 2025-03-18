@@ -47,7 +47,7 @@ const HymnList = () => {
               <div className="flex items-center">
                 <div className="flex-1">
                   <span className="text-xl group-hover:text-primary transition-colors duration-200 block">
-                    <span className="font-semibold mr-2">{hymn.number}.</span>
+                    {/* <span className="font-semibold mr-2">{hymn.number}.</span> */}
                     {hymn.title}
                   </span>
                   {hymn.language !== primaryLanguage && (
