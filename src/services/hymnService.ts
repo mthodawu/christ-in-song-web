@@ -59,7 +59,7 @@ const processMarkdownToVerses = (
   let isChorus = false;
 
   for (const line of lines) {
-    const trimmedLine = line;
+    const trimmedLine = line.trim();
     
     if (trimmedLine === "" && currentVerse !== "") {
       if (isChorus) {
@@ -86,6 +86,7 @@ const processMarkdownToVerses = (
       !trimmedLine.startsWith("**") &&
       !trimmedLine.startsWith("Chorus") &&
       !(trimmedLine === "") &&
+
       !/^\d+\./.test(trimmedLine)
     ) {
       // Add the line with a line break

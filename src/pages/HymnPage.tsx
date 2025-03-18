@@ -40,8 +40,9 @@ const HymnPage = () => {
           setError(null);
         } else {
           setHymn(null);
-          setError('Hymn not found in the selected language');
           toast.error('This hymn is not available in the selected language');
+          // setError('Hymn not found in the selected language');
+          navigate('/');
         }
       } catch (err) {
         console.error('Error loading hymn:', err);
