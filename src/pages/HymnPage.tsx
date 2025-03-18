@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -18,6 +17,7 @@ const HymnPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const initialVerse = location.state?.verse || 0;
 
   useEffect(() => {
     const loadHymn = async () => {
@@ -79,7 +79,7 @@ const HymnPage = () => {
   return (
     <div className="min-h-screen pt-16">
       <Navigation />
-      <HymnDisplay hymn={hymn} />
+      <HymnDisplay hymn={hymn} initialVerse={initialVerse} />
     </div>
   );
 };

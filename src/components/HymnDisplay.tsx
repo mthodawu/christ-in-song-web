@@ -11,10 +11,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 interface HymnDisplayProps {
   hymn: Hymn;
+  initialVerse?: number;
 }
 
-const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
-  const [currentVerse, setCurrentVerse] = useState(0);
+const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
+  const [currentVerse, setCurrentVerse] = useState(initialVerse);
   const {
     primaryLanguage,
     secondaryLanguage,
@@ -30,6 +31,15 @@ const HymnDisplay = ({ hymn }: HymnDisplayProps) => {
   const [currentHymn, setCurrentHymn] = useState<Hymn>(hymn);
   const [numberBuffer, setNumberBuffer] = useState<string>("");
   const [isNumberPadActive, setIsNumberPadActive] = useState(false);
+
+  // Handle language change navigation
+  useEffect(() => {
+    if (currentHymn.number) {
+      navigate(`/hymn/${primaryLanguage.toLowerCase()}-${currentHymn.number}`, {
+        state: { language: primaryLanguage, verse: currentVerse },
+      });
+    }
+  }, [primaryLanguage, currentHymn.number, navigate, currentVerse]);
 
   // Handle hymn update
   const handleHymnUpdated = (updatedHymn: Hymn) => {
