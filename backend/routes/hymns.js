@@ -88,8 +88,8 @@ router.put('/:language/:id', async (req, res) => {
   }
 });
 
+// IMPORTANT: This search route must come after the more specific /:language/:id routes
 // GET /hymns/search/:language - Search hymns across all languages
-// IMPORTANT: This route must be defined after /:language/:id routes to prevent conflicts
 router.get('/search/:language', async (req, res) => {
   try {
     const { query } = req.query;
@@ -129,7 +129,7 @@ router.get('/search/:language', async (req, res) => {
         };
         
         // If query is a number, also search by hymn number
-        if (!isNaN(query)) {
+        if (!isNaN(Number(query)) && query.trim() !== '') {
           searchQuery.$or.push({ number: Number(query) });
         }
 
@@ -147,7 +147,7 @@ router.get('/search/:language', async (req, res) => {
     res.json(searchResults);
   } catch (error) {
     console.error('Search error:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ status: 500, message: error.message });
   }
 });
 
