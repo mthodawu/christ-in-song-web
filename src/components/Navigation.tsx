@@ -6,6 +6,8 @@ import {
   Grip,
   BadgeInfo,
   Rocket,
+  Maximize,
+  Minimize,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +50,31 @@ const Navigation = () => {
     searchQuery,
     setSearchQuery,
   } = useHymn();
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    }
+  };
+
+  // Update fullscreen state when it changes outside our control (e.g. Esc key)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
@@ -105,20 +132,15 @@ const Navigation = () => {
           break;
         case "i":
           setInfo(!info);
+          break;
+        case "f":
+          toggleFullscreen();
+          break;
         default:
           break;
-        // Handle number keys
-        // if (event.key >= "0" && event.key <= "9") {
-        //   if (!isNumberPadActive) {
-        //     setNumberBuffer(event.key);
-        //     setIsNumberPadActive(true);
-        //   } else if (numberBuffer.length < 3) {
-        //     setNumberBuffer(prev => prev + event.key);
-        //   }
-        // }
       }
     },
-    [navigate, setIsDualMode, isDarkMode, setIsDarkMode]
+    [navigate, setIsDualMode, isDarkMode, setIsDarkMode, toggleFullscreen]
   );
 
   // Add keyboard event listener
@@ -168,7 +190,7 @@ const Navigation = () => {
               123
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[275px]">
+          <DialogContent className="sm:max-w-[375px]">
             <DialogHeader>
               <DialogTitle>Go to Hymn</DialogTitle>
               <DialogDescription>
@@ -250,12 +272,29 @@ const Navigation = () => {
                 <p className="text-sm text-muted-foreground">
                   Press <strong>V</strong> to toggle dark mode.
                 </p>
+                <p className="text-sm text-muted-foreground">
+                  Press <strong>I</strong> to view this information.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Press <strong>F</strong> to toggle fullscreen mode.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Press <strong>E</strong> to edit hymns in the Hymn page.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Press <strong>ESC</strong> to close this dialog.
+                  </p>
               </div>
             </div>
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1" className="w-full">
                 <AccordionTrigger className="flex items-center justify-between w-full">
-                  <div className="flex items-center justify-between w-1/2 text-center">
+                  <div className="flex items-center justify-start w-full text-center">
+                    <img
+                      className="w-16 h-16 p-4 "
+                      src="/icon.png"
+                      alt="icon"
+                    />
                     <span>About this app</span>
                   </div>
                 </AccordionTrigger>
@@ -343,6 +382,10 @@ const Navigation = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
+
+          <Button variant="outline" onClick={toggleFullscreen}>
+            {isFullscreen ? <Minimize /> : <Maximize />}
+          </Button>
 
           <Button variant="outline" onClick={toggleDarkMode}>
             {isDarkMode ? <Sun /> : <Moon />}
