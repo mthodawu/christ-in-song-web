@@ -70,9 +70,9 @@ const Navigation = () => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
 
@@ -152,10 +152,12 @@ const Navigation = () => {
   }, [handleKeyPress]);
 
   return (
-    <nav className={cn(
-      "fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-b z-10 transition-all duration-300",
-      isFullscreen && "opacity-0 hover:opacity-100"
-    )}>
+    <nav
+      className={cn(
+        "fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-b z-10 transition-all duration-300",
+        isFullscreen && "opacity-0 hover:opacity-100"
+      )}
+    >
       <div className="max-w-5xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -254,45 +256,53 @@ const Navigation = () => {
           <DialogTrigger asChild>
             <Button variant="outline">
               <BadgeInfo className="mr-2" />
-              help
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[375px]">
             <DialogHeader>
-              <DialogTitle>Go to Hymn</DialogTitle>
+              <DialogTitle>Help & info</DialogTitle>
               <DialogDescription>
-                Enter hymn number to navigate
+                Keyboard shortcuts for navigation and functionality.
               </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-3">
+                <h4 className="text-md font-semibold">General Shortcuts</h4>
                 <p className="text-sm text-muted-foreground">
-                  Press <strong>B</strong> to go back to the list of hymns.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Press <strong>D</strong> to toggle dual languages mode.
+                  Press <strong>F</strong> to toggle fullscreen mode.
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Press <strong>V</strong> to toggle dark mode.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Press <strong>I</strong> to view this information.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Press <strong>F</strong> to toggle fullscreen mode.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Press <strong>E</strong> to edit hymns in the Hymn page.
+                  Press <strong>I</strong> to open this info panel again.
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Press <strong>ESC</strong> to close this dialog.
-                  </p>
+                </p>
+                <h4 className="text-md font-semibold mt-4">Hymn Shortcuts</h4>
+                <p className="text-sm text-muted-foreground">
+                  Press <strong>B</strong> to go back to the list of hymns.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Press <strong>D</strong> to select second language (if
+                  available).
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Press <strong>E</strong> to edit hymns on the Hymn page.
+                </p>
+                <p className="text-sm text-muted-foreground -my-1">
+                  Press <strong className="text-lg ">&#8678;</strong> to go to the previous verse..
+                </p>
+                <p className="text-sm text-muted-foreground -mt-2">
+                  Press <strong className="text-lg ">&#8680;</strong> to go to the next verse.
+                </p>
               </div>
             </div>
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion type="single" collapsible className="w-full ">
               <AccordionItem value="item-1" className="w-full">
                 <AccordionTrigger className="flex items-center justify-between w-full">
-                  <div className="flex items-center justify-start w-full text-center">
+                  <div className="flex items-center justify-start w-full text-center -my-4">
                     <img
                       className="w-16 h-16 p-4 "
                       src="/icon.png"
