@@ -3,6 +3,7 @@ const router = express.Router();
 const { getModelForLanguage } = require("../models/Hymn");
 const Change = require("../models/Change");
 const mongoose = require("mongoose");
+const { createPatch } = require('diff');
 
 // GET /hymns/:language - Get all hymns for a language
 router.get("/:language", async (req, res) => {
@@ -57,23 +58,27 @@ router.put("/:language/:id", async (req, res) => {
 
     // Track changes before updating
     if (title !== hymn.title) {
+      const titleDiff = createPatch('title', hymn.title, title);
       await new Change({
         hymnId: hymn.id || `${language}-${hymnNumber}`,
         language,
         fieldChanged: "title",
         oldValue: hymn.title,
         newValue: title,
+        difference: titleDiff
       }).save();
       hymn.title = title;
     }
 
     if (markdown !== hymn.markdown) {
+      const markdownDiff = createPatch('content', hymn.markdown, markdown);
       await new Change({
         hymnId: hymn.id,
         language,
         fieldChanged: "markdown",
         oldValue: hymn.markdown,
         newValue: markdown,
+        difference: markdownDiff
       }).save();
       hymn.markdown = markdown;
     }
@@ -83,12 +88,12 @@ router.put("/:language/:id", async (req, res) => {
 
     res.json(hymn);
   } catch (error) {
+    console.error("Error updating hymn:", error);
     res.status(500).json({ message: error.message });
   }
 });
 
 // IMPORTANT: This search route must come after the more specific /:language/:id routes
 // GET /hymns/search/:language - Search hymns across all languages
-
 
 module.exports = router;

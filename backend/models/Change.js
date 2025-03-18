@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const changeSchema = new mongoose.Schema({
@@ -20,6 +19,10 @@ const changeSchema = new mongoose.Schema({
     required: true
   },
   newValue: {
+    type: String,
+    required: true
+  },
+  difference: {
     type: String,
     required: true
   },
