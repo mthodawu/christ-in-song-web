@@ -88,11 +88,17 @@ router.put('/:language/:id', async (req, res) => {
   }
 });
 
-// GET /search/:language - Search hymns across all languages
+// GET /hymns/search/:language - Search hymns across all languages
+// IMPORTANT: This route must be defined after /:language/:id routes to prevent conflicts
 router.get('/search/:language', async (req, res) => {
   try {
     const { query } = req.query;
     const primaryLanguage = req.params.language.toLowerCase();
+    
+    if (!query) {
+      return res.status(400).json({ message: 'Search query is required' });
+    }
+    
     const searchResults = [];
     
     // Get list of all collections representing languages
