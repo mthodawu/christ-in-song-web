@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const { getModelForLanguage } = require('../models/Hymn');
@@ -87,7 +88,7 @@ router.put('/:language/:id', async (req, res) => {
   }
 });
 
-// GET /hymns/search/:language - Search hymns across all languages
+// GET /search/:language - Search hymns across all languages
 router.get('/search/:language', async (req, res) => {
   try {
     const { query } = req.query;
@@ -108,25 +109,33 @@ router.get('/search/:language', async (req, res) => {
     ];
     
     for (const language of orderedCollections) {
-      const HymnModel = getModelForLanguage(language);
+      // Skip collections that aren't properly initialized
+      if (!collections[language]) continue;
       
-      const searchQuery = {
-        $or: [
-          { title: { $regex: query, $options: 'i' } },
-          { markdown: { $regex: query, $options: 'i' } }
-        ]
-      };
-      
-      // If query is a number, also search by hymn number
-      if (!isNaN(query)) {
-        searchQuery.$or.push({ number: Number(query) });
-      }
+      try {
+        const HymnModel = getModelForLanguage(language);
+        
+        const searchQuery = {
+          $or: [
+            { title: { $regex: query, $options: 'i' } },
+            { markdown: { $regex: query, $options: 'i' } }
+          ]
+        };
+        
+        // If query is a number, also search by hymn number
+        if (!isNaN(query)) {
+          searchQuery.$or.push({ number: Number(query) });
+        }
 
-      const languageResults = await HymnModel.find(searchQuery).sort({ number: 1 });
-      searchResults.push(...languageResults.map(hymn => ({ 
-        ...hymn.toObject(), 
-        language 
-      })));
+        const languageResults = await HymnModel.find(searchQuery).sort({ number: 1 });
+        searchResults.push(...languageResults.map(hymn => ({ 
+          ...hymn.toObject(), 
+          language 
+        })));
+      } catch (error) {
+        console.error(`Error searching collection ${language}:`, error);
+        // Continue with other collections even if one fails
+      }
     }
     
     res.json(searchResults);
