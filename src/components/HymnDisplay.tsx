@@ -31,6 +31,18 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
   const [currentHymn, setCurrentHymn] = useState<Hymn>(hymn);
   const [numberBuffer, setNumberBuffer] = useState<string>("");
   const [isNumberPadActive, setIsNumberPadActive] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Monitor fullscreen state
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   // Handle language change navigation
   useEffect(() => {
@@ -282,7 +294,12 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
         </Dialog>
       )}
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t">
+      <footer 
+        className={cn(
+          "fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t transition-all duration-300",
+          isFullscreen && "opacity-0 hover:opacity-100"
+        )}
+      >
         <div className="max-w-5xl mx-auto p-4 flex justify-between items-center gap-5">
           <Button
             variant="ghost"

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -59,7 +60,6 @@ const Navigation = () => {
       setIsFullscreen(true);
     } else {
       if (document.exitFullscreen) {
-        document.exitFullscreen();
         setIsFullscreen(false);
       }
     }
@@ -152,7 +152,10 @@ const Navigation = () => {
   }, [handleKeyPress]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-b z-10">
+    <nav className={cn(
+      "fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-b z-10 transition-all duration-300",
+      isFullscreen && "opacity-0 hover:opacity-100"
+    )}>
       <div className="max-w-5xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
