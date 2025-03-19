@@ -22,6 +22,12 @@ export const availableLanguages: Language[] = [
 const hymnsCache: Record<Language, Hymn[]> = {} as Record<Language, Hymn[]>;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
+const decodeHtmlEntities = (text: string): string => {
+  const textArea = document.createElement('textarea');
+  textArea.innerHTML = text;
+  return textArea.value;
+};
+
 const loadHymnsForLanguage = async (language: Language): Promise<Hymn[]> => {
   if (hymnsCache[language]) {
     return hymnsCache[language];
@@ -51,7 +57,10 @@ const processMarkdownToVerses = (
 ): { number?: number; content: string }[] => {
   if (!markdown) return [];
 
-  const lines = markdown.split("\n");
+  // Decode HTML entities in the markdown first
+  const decodedMarkdown = decodeHtmlEntities(markdown);
+  
+  const lines = decodedMarkdown.split("\n");
   const verses = [];
   let currentVerse = "";
   let chorus = "";
@@ -79,16 +88,17 @@ const processMarkdownToVerses = (
     } else if (trimmedLine.startsWith("  **CHORUS:**")) {
       isChorus = true;
       currentVerse += trimmedLine.replace("  **CHORUS:**", "Chorus: ");
-    } else if (
+        } else if (
       !trimmedLine.startsWith("###") &&
       !trimmedLine.startsWith("**CHORUS:**") &&
       !trimmedLine.startsWith("Verse") &&
       !trimmedLine.startsWith("**") &&
       !trimmedLine.startsWith("Chorus") &&
       !(trimmedLine === "") &&
-
+      !(/[A-Z]{2,}/.test(trimmedLine) && verseNumber === 1) &&
+      !trimmedLine.startsWith("Doh is") &&
       !/^\d+\./.test(trimmedLine)
-    ) {
+        ) {
       // Add the line with a line break
       currentVerse += (currentVerse ? "\n" : "") + trimmedLine;
     }
