@@ -10,7 +10,7 @@ import {
   MessageCircleQuestion,
   BookOpenText,
 } from "lucide-react";
-
+import {savePreferences, loadPreferences } from '../services/preferencesService';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -179,6 +179,27 @@ const Navigation = () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
   }, [handleKeyPress]);
+
+  // Save preferences whenever they change
+    useEffect(() => {
+      savePreferences({
+        isDarkMode,
+        isDualMode,
+        primaryLanguage,
+        secondaryLanguage
+      });
+    }, [isDarkMode, isDualMode, primaryLanguage, secondaryLanguage]);
+
+    // Load preferences when the app starts
+      useEffect(() => {
+        const storedPreferences = loadPreferences();
+        if (storedPreferences) {
+          setIsDarkMode(storedPreferences.isDarkMode);
+          setIsDualMode(storedPreferences.isDualMode);
+          setPrimaryLanguage(storedPreferences.primaryLanguage);
+          setSecondaryLanguage(storedPreferences.secondaryLanguage || null);
+        }
+      }, []);
 
   return (
     <nav
