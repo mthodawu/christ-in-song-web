@@ -77,7 +77,7 @@ const HymnPage = () => {
   }
 
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen pt-8 sm:text-sm">
       <Navigation />
       <HymnDisplay hymn={hymn} initialVerse={initialVerse} />
     </div>

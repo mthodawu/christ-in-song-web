@@ -8,6 +8,7 @@ import {
   Maximize,
   Minimize,
   MessageCircleQuestion,
+  BookOpenText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -180,8 +181,8 @@ const Navigation = () => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
-              <Languages className="mr-2" />
-              {primaryLanguage}
+              <Languages className="md:mr-2 sm:-mr-2" />
+              <span className="hidden md:block">{primaryLanguage}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -209,12 +210,10 @@ const Navigation = () => {
 
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline">
-              <Grip className="mr-2" />
-              123
-            </Button>
+            <Button variant="outline" className="sm:-mx-2 sm:-px-2">
+              <Grip  /> <span className="hidden md:block">123</span></Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[375px]">
+          <DialogContent className="max-w-[375px]">
             <DialogHeader>
               <DialogTitle>Go to Hymn</DialogTitle>
               <DialogDescription>
@@ -240,7 +239,7 @@ const Navigation = () => {
               }}
               className="mb-4"
             />
-            <div className="grid grid-cols-3 gap-2 sm:max-w-[200px] mx-auto -mt-4">
+            <div className="md:grid grid-cols-3 gap-2 hidden  mx-auto -mt-4">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                 <Button
                   key={num}
@@ -280,10 +279,10 @@ const Navigation = () => {
           <Dialog open={info} onOpenChange={setInfo}>
             <DialogTrigger asChild>
               <Button variant="outline">
-                <BadgeInfo className="mr-2" />
+                <BadgeInfo className="" /><span className="hidden md:block">help</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[375px]">
+            <DialogContent className="max-w-[375px]">
               <DialogHeader>
                 <DialogTitle>Help & info</DialogTitle>
                 <DialogDescription>
@@ -341,7 +340,8 @@ const Navigation = () => {
             onClick={() => setIsDualMode(!isDualMode)}
             className={isDualMode ? "bg-primary text-primary-foreground" : ""}
           >
-            Dual Mode
+             <BookOpenText className="" />
+             <span className="hidden md:block">dual language mode</span>
           </Button>
 
           {isDualMode && (

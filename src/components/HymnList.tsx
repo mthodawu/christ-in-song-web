@@ -42,7 +42,7 @@ const HymnList = () => {
                   state: { language: hymn.language }
                 });
               }}
-              className="w-full p-4 text-left rounded-lg bg-card hover:bg-accent transition-colors duration-200 group"
+              className="w-full -mt-6 p-2 text-left rounded-lg bg-card hover:bg-accent transition-colors duration-200 group"
             >
               <div className="flex items-center">
                 <div className="flex-1">

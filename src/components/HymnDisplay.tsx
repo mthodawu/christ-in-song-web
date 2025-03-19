@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ArrowLeft, Edit } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft, Edit, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHymn } from "@/context/HymnContext";
 import hymnService from "@/services/hymnService";
@@ -264,16 +264,16 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
       <header className="p-4 flex items-center justify-center">
         <div className="flex items-center">
           <div>
-            <h1 className="text-2xl font-light">{currentHymn.title}</h1>
+            <h1 className="mt-6 text-2xl font-light">{currentHymn.title}</h1>
             {/* <p className="text-muted-foreground">Hymn {currentHymn.number}</p> */}
           </div>
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-4">
+      <main className="flex-1 flex items-center justify-center p-4 ">
         <div className=" w-full space-y-4 verse-transition">
           <div
-            className={cn("hymn-text text-center", isDualMode && "text-center")}
+            className={cn("text-md md:hymn-text text-center", isDualMode && "text-center")}
           >
             {formattedVerses}
           </div>
@@ -300,14 +300,15 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
           isFullscreen && "opacity-0 hover:opacity-100"
         )}
       >
-        <div className="max-w-5xl mx-auto p-4 flex justify-between items-center gap-5">
+        <div className="max-w-5xl mx-auto p-2 sm:p-2 flex flex-wrap justify-center sm:justify-between items-center gap-2 sm:gap-5 sm:text-xs">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
             className="mr-4"
           >
-            <ArrowLeft className="mr-2" />
-            Back to Hymns
+            <ArrowLeft className="mr-2 sm:-mx-1" />
+            <span className="hidden md:block">to Hymns</span>
+            <List className="md:hidden" />
           </Button>
           <Button
             variant="outline"
@@ -315,16 +316,16 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
             onClick={() => setIsEditDialogOpen(true)}
             className="ml-auto"
           >
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Hymn
+            <Edit className="mr-2 h-4 w-4 sm:-mx-1" />
+            <span className="hidden md:block">Edit</span>
           </Button>
           <Button
             variant="outline"
             onClick={() => hasPrevVerse && setCurrentVerse(currentVerse - 1)}
             disabled={!hasPrevVerse}
           >
-            <ChevronLeft className="mr-2" />
-            Previous
+            <ChevronLeft className="mr-2  sm:-mx-1" />
+            <span className="hidden md:block">Previous</span>
           </Button>
 
           <Button
@@ -332,8 +333,8 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
             onClick={() => hasNextVerse && setCurrentVerse(currentVerse + 1)}
             disabled={!hasNextVerse}
           >
-            Next
-            <ChevronRight className="ml-2" />
+             <span className="hidden md:block">Next</span>
+            <ChevronRight className="ml-2 sm:-mx-1" />
           </Button>
         </div>
       </footer>

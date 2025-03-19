@@ -32,7 +32,7 @@ const About = () => {
           </div>
 
           <div className="flex flex-col gap-2 items-center justify-center">
-            <p className="text-sm text-muted-foreground text-justify w-1/2 mb-1">
+            <p className="text-sm text-muted-foreground text-justify w-4/5 md:w-1/2 mb-1">
               This Christ in Song web app was developed by iLanga Creatives to
               help users easily navigate, and project hymns in multiple
               languages during worship services.
@@ -43,7 +43,7 @@ const About = () => {
             <>
               <Button
                 variant="outline"
-                className="w-1/5 flex items-center justify-center gap-2 text-primary "
+                className="md:w-1/5 flex items-center justify-center gap-2 text-primary "
                 onClick={() => setIsWatchDemoOpen(true)}
               >
                 Watch Demo <PlayCircleIcon className="w-4 h-4" />
@@ -110,36 +110,36 @@ const About = () => {
               </li>
             </ul>
             <hr className="border-t border-gray-200 dark:border-gray-700 w-1/2  my-2" />
-            <div className="flex gap-4 -mt-4 justify-between items-center w-1/2">
-              <p className="text-sm text-muted-foreground w-3/4 text-left mt-2">
+            <div className="flex flex-col md:flex-row gap-4 -mt-4 justify-between items-center w-4/5 md:w-1/2">
+              <p className="text-sm text-muted-foreground w-full text-center md:text-left mt-2 order-1">
                 Download the mobile apps developed by Tinashe Mzondiwa:
               </p>
-              <div className="flex gap-4 items-center justify-start w-1/2 mt-2 ml">
+              <div className="flex gap-4 items-center justify-center md:justify-start w-full md:w-1/2 mt-2 ml order-2">
                 <a
-                  href="https://play.google.com/store/apps/details?id=com.tinashe.christInSong&pcampaignid=web_share" // Add PlayStore link here
+                  href="https://play.google.com/store/apps/details?id=com.tinashe.christInSong&pcampaignid=web_share"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity ml-2 mr-4"
+                  className="hover:opacity-80 transition-opacity ml-2 mr-4 flex flex-col items-center"
                 >
                   <img
                     src="https://img.icons8.com/fluency/48/google-play-store-new.png"
                     alt="Get it on Google Play"
-                    className="h-8"
+                    className="h-12 w-12 md:h-8 md:w-8"
                   />
-                  <p className="text-xs text-muted-foreground">Android</p>
+                  <p className="text-sm md:text-xs text-muted-foreground text-center"><span className="block md:hidden">Download on</span>Android </p>
                 </a>
                 <a
-                  href="https://apps.apple.com/us/app/christ-in-song-multi-language/id1067718185" // Add AppStore link here
+                  href="https://apps.apple.com/us/app/christ-in-song-multi-language/id1067718185"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity flex flex-col items-center"
                 >
                   <img
                     src="https://img.icons8.com/color/48/apple-app-store--v1.png"
                     alt="Download on the App Store"
-                    className="h-8"
+                    className="h-12 w-12 md:h-8 md:w-8"
                   />
-                  <p className="text-xs text-muted-foreground">Apple</p>
+                  <p className="text-sm md:text-xs text-muted-foreground text-center"><span className="block md:hidden">Download on</span>iOS</p>
                 </a>
               </div>
             </div>
