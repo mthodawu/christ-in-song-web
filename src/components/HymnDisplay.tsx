@@ -64,7 +64,11 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
     if (currentHymn.number) {
       const expectedPath = `/hymn/${primaryLanguage.toLowerCase()}-${currentHymn.number}`;
       // Only navigate if language changes, not when hymn number changes
-      if (window.location.pathname !== expectedPath && !window.location.pathname.includes(String(currentHymn.number))) {
+      console.log(`Navigating to ${expectedPath}`);
+      console.log(`Current path: ${window.location.pathname}`);
+    
+      if (window.location.pathname !== expectedPath && (window.location.pathname.includes(String(currentHymn.number)) || window.location.pathname.includes(primaryLanguage.toLowerCase()))) {
+        console.log(`Navigating to ${expectedPath}`);
         navigate(expectedPath, {
           state: { language: primaryLanguage, verse: currentVerse },
           replace: true,
