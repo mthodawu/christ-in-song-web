@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,7 +7,8 @@ import { HymnProvider } from "@/context/HymnContext";
 import Index from "./pages/Index";
 import HymnPage from "./pages/HymnPage";
 import NotFound from "./pages/NotFound";
-import axios from "axios";
+import About from "./pages/About";
+// import axios from "axios";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +22,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/hymn/:id" element={<HymnPage />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

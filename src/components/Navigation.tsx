@@ -2,13 +2,12 @@ import {
   Moon,
   Sun,
   Languages,
-  Search,
+  // Search,
   Grip,
   BadgeInfo,
-  Rocket,
   Maximize,
   Minimize,
-  PlayCircleIcon,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,13 +29,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useHymn } from "@/context/HymnContext";
-import type { Language } from "@/types/hymn";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
+// import type { Language } from "@/types/hymn";
+// import {
+//   Accordion,
+//   AccordionItem,
+//   AccordionTrigger,
+//   AccordionContent,
+// } from "@/components/ui/accordion";
 
 const Navigation = () => {
   const {
@@ -138,6 +137,23 @@ const Navigation = () => {
         case "f":
           toggleFullscreen();
           break;
+        case "0":
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9":
+          setIsOpen(!isOpen);
+          break;
+        case "enter":
+          if (isOpen) {
+            handleGo();
+          }
+          break;
         default:
           break;
       }
@@ -190,6 +206,7 @@ const Navigation = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div> */}
+
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button variant="outline">
@@ -216,9 +233,14 @@ const Navigation = () => {
                   setHymnNumber(value);
                 }
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleGo();
+                }
+              }}
               className="mb-4"
             />
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2 sm:max-w-[200px] mx-auto -mt-4">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                 <Button
                   key={num}
@@ -254,158 +276,66 @@ const Navigation = () => {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={info} onOpenChange={setInfo}>
-          <DialogTrigger asChild>
-            <Button variant="outline">
-              <BadgeInfo className="mr-2" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[375px]">
-            <DialogHeader>
-              <DialogTitle>Help & info</DialogTitle>
-              <DialogDescription>
-                Keyboard shortcuts for navigation and functionality.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-3">
-                <h4 className="text-md font-semibold">General Shortcuts</h4>
-                <p className="text-sm text-muted-foreground">
-                  Press <strong>F</strong> to toggle fullscreen mode.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Press <strong>V</strong> to toggle dark mode.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Press <strong>I</strong> to open this info panel again.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Press <strong>ESC</strong> to close this dialog.
-                </p>
-                <h4 className="text-md font-semibold mt-4">Hymn Shortcuts</h4>
-                <p className="text-sm text-muted-foreground">
-                  Press <strong>B</strong> to go back to the list of hymns.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Press <strong>D</strong> to select second language (if
-                  available).
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Press <strong>E</strong> to edit hymns on the Hymn page.
-                </p>
-                <p className="text-sm text-muted-foreground -my-1">
-                  Press <strong className="text-lg ">&#8678;</strong> to go to
-                  the previous verse..
-                </p>
-                <p className="text-sm text-muted-foreground -mt-2">
-                  Press <strong className="text-lg ">&#8680;</strong> to go to
-                  the next verse.
-                </p>
-              </div>
-            </div>
-
-            <Accordion type="single" collapsible className="w-full ">
-              <AccordionItem value="item-1" className="w-full">
-                <AccordionTrigger className="flex items-center justify-between w-full">
-                  <div className="flex items-center justify-start w-full text-center -my-4">
-                    <img
-                      className="w-16 h-16 p-4 "
-                      src="/icon.png"
-                      alt="icon"
-                    />
-                    <span>About this app</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="flex flex-col gap-2">
-                    <p className="text-sm text-muted-foreground text-justify">
-                      This Christ in Song web app was developed by iLanga
-                      Creatives to help users easily navigate, and project hymns
-                      in multiple languages during worship services.
-                    </p>
-                    <>
-                      <Button
-                        variant="outline"
-                        className="w-full flex items-center justify-center gap-2 "
-                        onClick={() => setIsWatchDemoOpen(true)}
-                      >
-                        Watch Demo <PlayCircleIcon className="w-4 h-4" />
-                      </Button>
-                      <Dialog
-                        open={isWatchDemoOpen}
-                        onOpenChange={setIsWatchDemoOpen}
-                      >
-                        <DialogContent className="sm:max-w-[600px]">
-                          <DialogHeader>
-                            <DialogTitle>Watch Demo</DialogTitle>
-                            <DialogDescription>
-                              Learn how to use the Christ in Song app
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="aspect-video">
-                            <iframe
-                              width="100%"
-                              height="100%"
-                              src="https://www.youtube.com/embed/62MNc2xODog?si=adRVIwjLrl-dLo4K"
-                              title="YouTube video player"
-                              frameBorder="0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                              referrerPolicy="strict-origin-when-cross-origin"
-                              allowFullScreen
-                            />
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </>
-
-                    {/* <p className="text-sm text-muted-foreground">
-                  Visit us at: <a href="https://ilangacreatives.co.za" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">ilangacreatives.co.za</a>
-                </p> */}
-                    <p className="text-sm text-muted-foreground">
-                      For any queries or feedback, please contact us:
-                    </p>
-                    <ul className="text-sm text-muted-foreground list-disc list-inside">
-                      <li>
-                        Email:{" "}
-                        <a
-                          href="mailto:ilangacreatives@gmail.com"
-                          className="text-orange-600 hover:underline"
-                        >
-                          ilangacreatives@gmail.com
-                        </a>
-                      </li>
-                      <li>
-                        Instagram:{" "}
-                        <a
-                          href="https://instagram.com/ilangacreatives"
-                          className="text-orange-600 hover:underline"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          @ilangacreatives
-                        </a>
-                      </li>
-                      <li>
-                        Website:{" "}
-                        <a
-                          href="https://ilangacreatives.co.za"
-                          className="text-orange-600 hover:underline group inline-flex items-center gap-1"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          ilangacreatives.co.za
-                          <Rocket className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </DialogContent>
-        </Dialog>
-
         <div className="flex gap-2">
+          <Dialog open={info} onOpenChange={setInfo}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <BadgeInfo className="mr-2" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[375px]">
+              <DialogHeader>
+                <DialogTitle>Help & info</DialogTitle>
+                <DialogDescription>
+                  Keyboard shortcuts for navigation and functionality.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-3">
+                  <h4 className="text-md font-semibold">General Shortcuts</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Press <strong>F</strong> to toggle fullscreen mode.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Press <strong>V</strong> to toggle dark mode.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Press <strong>I</strong> to open this info panel again.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Press <strong>ESC</strong> to close this dialog.
+                  </p>
+                  <h4 className="text-md font-semibold mt-4">Hymn Shortcuts</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Press any key <strong>0-9</strong> to open the hymn number pad.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Press <strong>B</strong> to go back to the list of hymns.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Press <strong>D</strong> to select second language (if
+                    available).
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Press <strong>E</strong> to edit hymns on the Hymn page.
+                  </p>
+                  <p className="text-sm text-muted-foreground -my-1">
+                    Press <strong className="text-lg ">&#8678;</strong> to go to
+                    the previous verse..
+                  </p>
+                  <p className="text-sm text-muted-foreground -mt-2">
+                    Press <strong className="text-lg ">&#8680;</strong> to go to
+                    the next verse.
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" onClick={() => navigate("/about")}>
+                app info & demo
+                <MessageCircleQuestion className="mr-2 h-4 w-4" />
+              </Button>
+            </DialogContent>
+          </Dialog>
+
           <Button
             variant="outline"
             onClick={() => setIsDualMode(!isDualMode)}
