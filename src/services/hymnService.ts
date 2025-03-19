@@ -1,6 +1,6 @@
-
-import { Language, Hymn, HymnData } from "@/types/hymn";
+import { Language, Hymn, LanguageConfig } from "@/types/hymn";
 import axios from "axios";
+import config from '../config.json';
 
 export const availableLanguages: Language[] = [
   "chichewa",
@@ -186,6 +186,14 @@ export const getAllHymnsForLanguage = async (
   return loadHymnsForLanguage(language);
 };
 
+export const getAvailableLanguages = (): LanguageConfig[] => {
+  return config;
+};
+
+export const isValidLanguage = (language: string): boolean => {
+  return config.some(lang => lang.key === language);
+};
+
 export default {
   availableLanguages,
   getAllHymnsForLanguage,
@@ -193,4 +201,6 @@ export default {
   getHymnByNumber,
   // searchHymnsAcrossLanguages,
   updateHymn,
+  getAvailableLanguages,
+  isValidLanguage,
 };

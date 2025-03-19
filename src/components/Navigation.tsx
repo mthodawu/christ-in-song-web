@@ -10,6 +10,7 @@ import {
   MessageCircleQuestion,
   BookOpenText,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -30,24 +31,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useHymn } from "@/context/HymnContext";
-// import type { Language } from "@/types/hymn";
-// import {
-//   Accordion,
-//   AccordionItem,
-//   AccordionTrigger,
-//   AccordionContent,
-// } from "@/components/ui/accordion";
+import config from '../config.json';
+import { LanguageConfig } from '../types/hymn';
 
 const Navigation = () => {
+    const languageOptions = config.map((lang: LanguageConfig) => ({
+        value: lang.key,
+        label: `${lang.title} (${lang.language})`
+    }));
+
+    // Add handlers for language changes
+    const handlePrimaryLanguageChange = (value: string) => {
+        setPrimaryLanguage(value);
+    };
+
+    const handleSecondaryLanguageChange = (value: string) => {
+        setSecondaryLanguage(value);
+    };
+
   const {
-    primaryLanguage,
-    setPrimaryLanguage,
-    secondaryLanguage,
-    setSecondaryLanguage,
     isDualMode,
     setIsDualMode,
     isDarkMode,
     setIsDarkMode,
+    primaryLanguage,
+    secondaryLanguage,
+    setPrimaryLanguage,
+    setSecondaryLanguage,
     availableLanguages,
     searchQuery,
     setSearchQuery,
@@ -182,16 +192,18 @@ const Navigation = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
               <Languages className="md:mr-2 sm:-mr-2" />
-              <span className="hidden md:block">{primaryLanguage}</span>
+              <span className="hidden md:block">
+          {languageOptions.find(opt => opt.value === primaryLanguage)?.label || primaryLanguage}
+              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {availableLanguages.map((lang) => (
+            {languageOptions.map((lang) => (
               <DropdownMenuItem
-                key={lang}
-                onClick={() => setPrimaryLanguage(lang)}
+          key={lang.value}
+          onClick={() => handlePrimaryLanguageChange(lang.value)}
               >
-                {lang}
+          {lang.label}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -355,21 +367,24 @@ const Navigation = () => {
           {isDualMode && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  Secondary: {secondaryLanguage || "Select"}
-                </Button>
+              <Button variant="outline">
+                <Languages className="md:mr-2 sm:-mr-2" />
+                <span className="hidden md:block">
+                {languageOptions.find(opt => opt.value === secondaryLanguage)?.label || 'Select language'}
+                </span>
+              </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {availableLanguages
-                  .filter((lang) => lang !== primaryLanguage)
-                  .map((lang) => (
-                    <DropdownMenuItem
-                      key={lang}
-                      onClick={() => setSecondaryLanguage(lang)}
-                    >
-                      {lang}
-                    </DropdownMenuItem>
-                  ))}
+              {languageOptions
+                .filter(lang => lang.value !== primaryLanguage)
+                .map((lang) => (
+                <DropdownMenuItem
+                  key={lang.value}
+                  onClick={() => handleSecondaryLanguageChange(lang.value)}
+                >
+                  {lang.label}
+                </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -385,6 +400,6 @@ const Navigation = () => {
       </div>
     </nav>
   );
-};
+}
 
 export default Navigation;

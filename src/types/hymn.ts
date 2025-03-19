@@ -1,10 +1,14 @@
-export type Language =  'chichewa' | 'dholuo' | 'english' |  'ndebele' | 'pt' |  'sdah' | 'shona' | 'sotho' | 'swahili' | 
-  'tonga' | 'tswana' | 'venda' | 'xhosa' | 'xitsonga';
+export type Language = string; // Changed from explicit union type to string
+
+export interface LanguageConfig {
+    key: string;
+    title: string;
+    language: string;
+}
 
 export interface Verse {
   number?: number;
   content: string;
-
 }
 
 export interface Hymn {
