@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-// import Navigation from '@/components/Navigation';
+import Navigation from '@/components/Navigation';
 
 const About = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const About = () => {
 
   return (
     <div className="min-h-screen pt-16">
-      {/* <Navigation /> */}
+      <div className="opacity-0 hover:opacity-100"><Navigation  /></div>
       <main className="container max-w-3xl mx-auto py-8 px-4">
         <Button variant="ghost" onClick={() => navigate("/")} className="mb-4">
           <ArrowLeft className="mr-2" />
@@ -34,8 +34,8 @@ const About = () => {
           <div className="flex flex-col gap-2 items-center justify-center">
             <p className="text-sm text-muted-foreground text-justify w-4/5 md:w-1/2 mb-1">
               This Christ in Song web app was developed by iLanga Creatives to
-              help users easily navigate, and project hymns in multiple
-              languages during worship services.
+              help Music & Media teams easily navigate, display, and project hymns in multiple
+              languages during worship services. <br/><br/> Keyboard shortcuts have been added for convenience. Just press <strong>i</strong> to view the full list.                                                                                                      
               <br /> <br />
               If you want to learn more about this app and how to use it, please
               watch the demo video below.
