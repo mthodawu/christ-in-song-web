@@ -1,13 +1,27 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ArrowLeft, Edit, List } from "lucide-react";
+import { toast } from "sonner";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ArrowLeft,
+  Edit,
+  List,
+  ChevronsRight,
+  ChevronsLeft,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHymn } from "@/context/HymnContext";
 import hymnService from "@/services/hymnService";
 import { cn } from "@/lib/utils";
 import type { Hymn } from "@/types/hymn";
 import EditHymnDialog from "./EditHymnDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface HymnDisplayProps {
   hymn: Hymn;
@@ -23,6 +37,7 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
     setIsDualMode,
     isDarkMode,
     setIsDarkMode,
+    totalHymns,
   } = useHymn();
   const navigate = useNavigate();
   const [secondaryHymn, setSecondaryHymn] = useState<Hymn | null>(null);
@@ -38,20 +53,25 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
 
   // Handle language change navigation
   useEffect(() => {
     if (currentHymn.number) {
-      navigate(`/hymn/${primaryLanguage.toLowerCase()}-${currentHymn.number}`, {
-        state: { language: primaryLanguage, verse: currentVerse },
-      });
+      const expectedPath = `/hymn/${primaryLanguage.toLowerCase()}-${currentHymn.number}`;
+      // Only navigate if language changes, not when hymn number changes
+      if (window.location.pathname !== expectedPath && !window.location.pathname.includes(String(currentHymn.number))) {
+        navigate(expectedPath, {
+          state: { language: primaryLanguage, verse: currentVerse },
+          replace: true,
+        });
+      }
     }
-  }, [primaryLanguage, currentHymn.number, navigate, currentVerse]);
+  }, [primaryLanguage]); // Only depend on language changes
 
   // Handle hymn update
   const handleHymnUpdated = (updatedHymn: Hymn) => {
@@ -162,6 +182,13 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
     setFormattedVerses(alternatingLines);
   }, [currentHymn.verses, currentVerse, isDualMode, secondaryHymn]);
 
+  useEffect(() => {
+    if (!hymn) {
+      toast.error('Hymn not found');
+      navigate('/', { replace: true });
+    }
+  }, [hymn, navigate]);
+
   if (!currentHymn.verses || currentHymn.verses.length === 0) {
     return (
       <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center">
@@ -185,50 +212,79 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
   const hasPrevVerse = currentVerse > 0;
 
   // Handle keyboard navigation
-  const handleKeyPress = useCallback((event: KeyboardEvent) => {
-    // Ignore key events if they originated in an input field
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-      return;
-    }
+  const handleKeyPress = useCallback(
+    (event: KeyboardEvent) => {
+      // Ignore key events if they originated in an input field
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
 
-    switch (event.key.toLowerCase()) {
-      case "arrowleft":
-        if (hasPrevVerse) {
-          setCurrentVerse(prev => prev - 1);
-        }
-        break;
-      case "arrowright":
-        if (hasNextVerse) {
-          setCurrentVerse(prev => prev + 1);
-        }
-        break;
-      case "e":
-        setIsEditDialogOpen(true);
-        break;
-      case "b":
-        navigate("/");
-        break;
-      case "d":
-        setIsDualMode(!isDualMode);
-        break;
-      case "v":
-        const newMode = !isDarkMode;
-        setIsDarkMode(newMode);
-        document.documentElement.classList.toggle("dark", newMode);
-        break;
-      case "enter":
-        if (isNumberPadActive) {
-          handleNumberPadEnter();
-        }
-        break;
-      case "escape":
-        if (isNumberPadActive) {
-          setNumberBuffer("");
-          setIsNumberPadActive(false);
-        }
-        break;
-      default:
-        break;
+      switch (event.key.toLowerCase()) {
+        // case "arrowleft":
+        //   if (hasPrevVerse) {
+        //     setCurrentVerse((prev) => prev - 1);
+        //   }
+        //   break;
+        // case "arrowright":
+        //   if (hasNextVerse) {
+        //     setCurrentVerse((prev) => prev + 1);
+        //   }
+        //   break;
+        case "e":
+          setIsEditDialogOpen(true);
+          break;
+        case "b":
+          navigate("/");
+          break;
+        case "d":
+          setIsDualMode(!isDualMode);
+          break;
+        case "v":
+          const newMode = !isDarkMode;
+          setIsDarkMode(newMode);
+          document.documentElement.classList.toggle("dark", newMode);
+          break;
+        case "enter":
+          if (isNumberPadActive) {
+            handleNumberPadEnter();
+          }
+          break;
+        case "escape":
+          if (isNumberPadActive) {
+            setNumberBuffer("");
+            setIsNumberPadActive(false);
+          }
+          break;
+        case "arrowleft":
+          if (event.shiftKey) {
+            const prevNumber = Number(currentHymn.number) - 1;
+            if (prevNumber >= 1) {
+              navigate(`/hymn/${primaryLanguage.toLowerCase()}-${prevNumber}`, {
+                replace: true,
+              });
+            }
+          } else if (hasPrevVerse) {
+            setCurrentVerse((prev) => prev - 1);
+          }
+          break;
+        case "arrowright":
+          if (event.shiftKey) {
+            const nextNumber = Number(currentHymn.number) + 1;
+            if (nextNumber <= totalHymns) {
+              // You'll need to get totalHymns from your context or props
+              navigate(`/hymn/${primaryLanguage.toLowerCase()}-${nextNumber}`, {
+                replace: true,
+              });
+            }
+          } else if (hasNextVerse) {
+            setCurrentVerse((prev) => prev + 1);
+          }
+          break;
+        default:
+          break;
         // Handle number keys
         // if (event.key >= "0" && event.key <= "9") {
         //   if (!isNumberPadActive) {
@@ -238,18 +294,20 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
         //     setNumberBuffer(prev => prev + event.key);
         //   }
         // }
-    }
-  }, [
-    hasPrevVerse,
-    hasNextVerse,
-    navigate,
-    setIsDualMode,
-    isDarkMode,
-    setIsDarkMode,
-    isNumberPadActive,
-    numberBuffer,
-    handleNumberPadEnter
-  ]);
+      }
+    },
+    [
+      hasPrevVerse,
+      hasNextVerse,
+      navigate,
+      setIsDualMode,
+      isDarkMode,
+      setIsDarkMode,
+      isNumberPadActive,
+      numberBuffer,
+      handleNumberPadEnter,
+    ]
+  );
 
   // Add keyboard event listener
   useEffect(() => {
@@ -260,11 +318,11 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
   }, [handleKeyPress]);
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] flex flex-col">
-      <header className="p-4 flex items-center justify-center">
+    <div className="min-h-[calc(100vh-5rem)] flex flex-col ">
+      <header className="p-4 flex items-center justify-center mt-10">
         <div className="flex items-center">
           <div>
-            <h1 className="mt-6 text-2xl font-light">{currentHymn.title}</h1>
+            <h1 className="-mb-10 text-2xl font-light">{currentHymn.title}</h1>
             {/* <p className="text-muted-foreground">Hymn {currentHymn.number}</p> */}
           </div>
         </div>
@@ -273,7 +331,10 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
       <main className="flex-1 flex items-center justify-center p-4 ">
         <div className=" w-full space-y-4 verse-transition">
           <div
-            className={cn("text-md md:hymn-text text-center", isDualMode && "text-center")}
+            className={cn(
+              "text-md md:hymn-text text-center",
+              isDualMode && "text-center"
+            )}
           >
             {formattedVerses}
           </div>
@@ -288,19 +349,21 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
         <Dialog open={isNumberPadActive} onOpenChange={setIsNumberPadActive}>
           <DialogContent className="sm:max-w-[200px]">
             <DialogHeader>
-              <DialogTitle className="text-center text-3xl">{numberBuffer || "..."}</DialogTitle>
+              <DialogTitle className="text-center text-3xl">
+                {numberBuffer || "..."}
+              </DialogTitle>
             </DialogHeader>
           </DialogContent>
         </Dialog>
       )}
 
-      <footer 
+      <footer
         className={cn(
           "fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t transition-all duration-300",
           isFullscreen && "opacity-0 hover:opacity-100"
         )}
       >
-        <div className="max-w-5xl mx-auto p-2 sm:p-2 flex flex-wrap justify-center sm:justify-between items-center gap-2 sm:gap-5 sm:text-xs">
+        <div className="max-w-5xl mx-auto p-2 sm:p-2 flex flex-wrap justify-center sm:justify-between items-center gap-2 sm:gap-2 sm:text-xs">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
@@ -316,25 +379,65 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
             onClick={() => setIsEditDialogOpen(true)}
             className="ml-auto"
           >
-            <Edit className="mr-2 h-4 w-4 sm:-mx-1" />
+            <Edit className="md:mr-2 h-4 w-4 sm:-mx-1" />
             <span className="hidden md:block">Edit</span>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => hasPrevVerse && setCurrentVerse(currentVerse - 1)}
-            disabled={!hasPrevVerse}
-          >
-            <ChevronLeft className="mr-2  sm:-mx-1" />
-            <span className="hidden md:block">Previous</span>
           </Button>
 
           <Button
             variant="outline"
+            size="sm"
+            onClick={() => {
+              const prevNumber = Number(currentHymn.number) - 1;
+              if (prevNumber >= 1) {
+                navigate(
+                  `/hymn/${primaryLanguage.toLowerCase()}-${prevNumber}`,
+                  { replace: true }
+                );
+              }
+            }}
+            disabled={Number(currentHymn.number) <= 1}
+          >
+            <ChevronsLeft className="md:mr-2 sm:-mx-1" />
+            <span className="hidden md:block">prev hymn</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => hasPrevVerse && setCurrentVerse(currentVerse - 1)}
+            disabled={!hasPrevVerse}
+          >
+            <ChevronLeft className="md:mr-2  sm:-mx-1" />
+            <span className="hidden md:block">previous</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => hasNextVerse && setCurrentVerse(currentVerse + 1)}
             disabled={!hasNextVerse}
           >
-             <span className="hidden md:block">Next</span>
-            <ChevronRight className="ml-2 sm:-mx-1" />
+            <span className="hidden md:block">next</span>
+            <ChevronRight className="md:ml-2 sm:-mx-1" />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const nextNumber = Number(currentHymn.number) + 1;
+              if (nextNumber <= totalHymns) {
+                // You'll need to get totalHymns from your context or props
+                navigate(
+                  `/hymn/${primaryLanguage.toLowerCase()}-${nextNumber}`,
+                  { replace: true }
+                );
+              }
+            }}
+            disabled={Number(currentHymn.number) >= totalHymns}
+          >
+            <span className="hidden md:block">next hymn</span>
+            <ChevronsRight className="md:ml-2 sm:-mx-1" />
           </Button>
         </div>
       </footer>

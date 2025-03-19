@@ -17,6 +17,7 @@ interface HymnContextType {
   setSearchQuery: (query: string) => void;
   searchResults: Array<Hymn & { language: Language }>;
   availableLanguages: Language[];
+  totalHymns: number;
 }
 
 const HymnContext = createContext<HymnContextType | undefined>(undefined);
@@ -47,23 +48,23 @@ export function HymnProvider({ children }: { children: React.ReactNode }) {
     loadHymns();
   }, [primaryLanguage]);
 
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
+  // useEffect(() => {
+  //   if (!searchQuery.trim()) {
+  //     setSearchResults([]);
+  //     return;
+  //   }
 
-    const timer = setTimeout(async () => {
-      try {
-        const results = await hymnService.searchHymnsAcrossLanguages(searchQuery, primaryLanguage);
-        setSearchResults(results);
-      } catch (error) {
-        console.error('Search failed:', error);
-      }
-    }, 300);
+  //   const timer = setTimeout(async () => {
+  //     try {
+  //       const results = await hymnService.searchHymnsAcrossLanguages(searchQuery, primaryLanguage);
+  //       setSearchResults(results);
+  //     } catch (error) {
+  //       console.error('Search failed:', error);
+  //     }
+  //   }, 300);
 
-    return () => clearTimeout(timer);
-  }, [searchQuery, primaryLanguage]);
+  //   return () => clearTimeout(timer);
+  // }, [searchQuery, primaryLanguage]);
 
   return (
     <HymnContext.Provider
@@ -81,7 +82,8 @@ export function HymnProvider({ children }: { children: React.ReactNode }) {
         searchQuery,
         setSearchQuery,
         searchResults,
-        availableLanguages
+        availableLanguages,
+        totalHymns: hymns.length,
       }}
     >
       {children}
