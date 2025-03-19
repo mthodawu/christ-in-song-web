@@ -320,11 +320,19 @@ const Navigation = () => {
                   </p>
                   <p className="text-sm text-muted-foreground -my-1">
                     Press <strong className="text-lg ">&#8678;</strong> to go to
-                    the previous verse..
+                    the previous verse.
                   </p>
                   <p className="text-sm text-muted-foreground -mt-2">
                     Press <strong className="text-lg ">&#8680;</strong> to go to
                     the next verse.
+                  </p>
+                  <p className="text-sm text-muted-foreground -my-1">
+                    Press <strong>SHIFT+</strong><strong className="text-lg ">&#8678;</strong> to go to
+                    the previous song.
+                  </p>
+                  <p className="text-sm text-muted-foreground -mt-2">
+                    Press <strong>SHIFT+</strong><strong className="text-lg ">&#8680;</strong> to go to
+                    the next song.
                   </p>
                 </div>
               </div>
