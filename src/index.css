@@ -52,12 +52,22 @@
   * {
     @apply border-border;
   }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  html {
+    font-family:  Inter, system-ui, sans-serif;
+  }
+
+  /* h1, h2, h3, h4, h5, h6 {
+    font-family: Georgia, "Times New Roman", serif;
+  } */
 
   body {
     @apply bg-background text-foreground overflow-x-hidden transition-colors duration-300;
   }
 
   .hymn-text {
+    /* font-family:  Inter, system-ui, sans-serif; */
     @apply text-4xl md:text-3xl lg:text-4xl font-medium leading-relaxed tracking-wide;
   }
 

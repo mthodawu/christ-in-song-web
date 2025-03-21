@@ -326,13 +326,13 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
       <header className="p-4 flex items-center justify-center mt-10">
         <div className="flex items-center">
           <div>
-            <h1 className="-mb-10 text-4xl font-medium text-muted-foreground">{currentHymn.title}</h1>
+            <h1 className="-mb-5 text-2xl font-medium text-muted-foreground">{currentHymn.title}</h1>
             {/* <p className="text-muted-foreground">Hymn {currentHymn.number}</p> */}
           </div>
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-4 ">
+      <main className="flex-1 flex items-center justify-center p-4 mb-12">
         <div className=" w-full space-y-4 verse-transition">
           <div
             className={cn(
@@ -343,7 +343,7 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
             {formattedVerses}
           </div>
 
-          <div className="text-center text-muted-foreground">
+          <div className="text-center text-muted-foreground pb-4">
             Verse {currentVerse + 1} of {verses.length}
           </div>
         </div>
