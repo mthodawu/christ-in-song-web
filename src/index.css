@@ -58,7 +58,7 @@
   }
 
   .hymn-text {
-    @apply text-4xl md:text-3xl lg:text-4xl font-light leading-relaxed tracking-wide;
+    @apply text-4xl md:text-3xl lg:text-4xl font-medium leading-relaxed tracking-wide;
   }
 
   .verse-transition {

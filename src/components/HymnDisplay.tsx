@@ -326,7 +326,7 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
       <header className="p-4 flex items-center justify-center mt-10">
         <div className="flex items-center">
           <div>
-            <h1 className="-mb-10 text-2xl font-light">{currentHymn.title}</h1>
+            <h1 className="-mb-10 text-4xl font-medium text-muted-foreground">{currentHymn.title}</h1>
             {/* <p className="text-muted-foreground">Hymn {currentHymn.number}</p> */}
           </div>
         </div>

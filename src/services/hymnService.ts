@@ -85,9 +85,9 @@ const processMarkdownToVerses = (
       }
       currentVerse = "";
       isChorus = false;
-    } else if (trimmedLine.startsWith("  **CHORUS:**")) {
+    } else if (/\**[A-Z]{5,}\:/.test(trimmedLine) || trimmedLine.startsWith("**CHORUS:**")) {
       isChorus = true;
-      currentVerse += trimmedLine.replace("  **CHORUS:**", "Chorus: ");
+      currentVerse += trimmedLine.replace("**", "").replace(":**",":");
         } else if (
       !trimmedLine.startsWith("###") &&
       !trimmedLine.startsWith("**CHORUS:**") &&
