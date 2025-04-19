@@ -204,11 +204,26 @@ export const isValidLanguage = (language: string): boolean => {
   return config.some(lang => lang.key === language);
 };
 
+// Search hymns by title or markdown (case-insensitive, local search)
+export const searchHymns = (
+  hymns: Hymn[],
+  search: string
+): Hymn[] => {
+  if (!search.trim()) return [];
+  const lower = search.toLowerCase();
+  return hymns.filter(
+    (hymn) =>
+      hymn.title.toLowerCase().includes(lower) ||
+      hymn.markdown.toLowerCase().includes(lower)
+  );
+};
+
 export default {
   availableLanguages,
   getAllHymnsForLanguage,
   getHymnById,
   getHymnByNumber,
+  searchHymns,
   // searchHymnsAcrossLanguages,
   updateHymn,
   getAvailableLanguages,

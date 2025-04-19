@@ -1,6 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Language, Hymn } from '@/types/hymn';
-import hymnService, { availableLanguages } from '@/services/hymnService';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { Language, Hymn } from "@/types/hymn";
+import hymnService, {
+  availableLanguages,
+  searchHymns,
+} from "@/services/hymnService";
 
 interface HymnContextType {
   primaryLanguage: Language;
@@ -23,23 +26,29 @@ interface HymnContextType {
 const HymnContext = createContext<HymnContextType | undefined>(undefined);
 
 export function HymnProvider({ children }: { children: React.ReactNode }) {
-  const [primaryLanguage, setPrimaryLanguage] = useState<Language>('english');
-  const [secondaryLanguage, setSecondaryLanguage] = useState<Language | null>(null);
+  const [primaryLanguage, setPrimaryLanguage] = useState<Language>("english");
+  const [secondaryLanguage, setSecondaryLanguage] = useState<Language | null>(
+    null
+  );
   const [isDualMode, setIsDualMode] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [hymns, setHymns] = useState<Hymn[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Array<Hymn & { language: Language }>>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<
+    Array<Hymn & { language: Language }>
+  >([]);
 
   useEffect(() => {
     const loadHymns = async () => {
       setIsLoading(true);
       try {
-        const loadedHymns = await hymnService.getAllHymnsForLanguage(primaryLanguage);
+        const loadedHymns = await hymnService.getAllHymnsForLanguage(
+          primaryLanguage
+        );
         setHymns(loadedHymns);
       } catch (error) {
-        console.error('Failed to load hymns:', error);
+        console.error("Failed to load hymns:", error);
       } finally {
         setIsLoading(false);
       }
@@ -48,23 +57,24 @@ export function HymnProvider({ children }: { children: React.ReactNode }) {
     loadHymns();
   }, [primaryLanguage]);
 
-  // useEffect(() => {
-  //   if (!searchQuery.trim()) {
-  //     setSearchResults([]);
-  //     return;
-  //   }
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
 
-  //   const timer = setTimeout(async () => {
-  //     try {
-  //       const results = await hymnService.searchHymnsAcrossLanguages(searchQuery, primaryLanguage);
-  //       setSearchResults(results);
-  //     } catch (error) {
-  //       console.error('Search failed:', error);
-  //     }
-  //   }, 300);
+    try {
+      const results = searchHymns(hymns, searchQuery).map((hymn) => ({
+        ...hymn,
+        language: primaryLanguage,
+      }));
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Search failed:", error);
+    }
 
-  //   return () => clearTimeout(timer);
-  // }, [searchQuery, primaryLanguage]);
+    // Local search in loaded hymns for the current language
+  }, [searchQuery, hymns, primaryLanguage]);
 
   return (
     <HymnContext.Provider
@@ -94,7 +104,7 @@ export function HymnProvider({ children }: { children: React.ReactNode }) {
 export function useHymn() {
   const context = useContext(HymnContext);
   if (context === undefined) {
-    throw new Error('useHymn must be used within a HymnProvider');
+    throw new Error("useHymn must be used within a HymnProvider");
   }
   return context;
 }

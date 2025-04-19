@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { useHymn } from '@/context/HymnContext';
 import { Badge } from '@/components/ui/badge';
 
-const HymnList = () => {
+const HymnList = ({onHymnClick}:{ onHymnClick?: () => void }) => {
   const { 
     hymns, 
     isLoading, 
@@ -41,6 +41,7 @@ const HymnList = () => {
                 navigate(`/hymn/${hymn.id}`, {
                   state: { language: hymn.language }
                 });
+                if (onHymnClick) onHymnClick();
               }}
               className="w-full -mt-6 p-2 text-left rounded-lg bg-card hover:bg-accent transition-colors duration-200 group"
             >

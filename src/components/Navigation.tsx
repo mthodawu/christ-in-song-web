@@ -9,8 +9,12 @@ import {
   Minimize,
   MessageCircleQuestion,
   BookOpenText,
+  Search,
 } from "lucide-react";
-import {savePreferences, loadPreferences } from '../services/preferencesService';
+import {
+  savePreferences,
+  loadPreferences,
+} from "../services/preferencesService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -31,23 +35,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useHymn } from "@/context/HymnContext";
-import config from '../config.json';
-import { LanguageConfig } from '../types/hymn';
+import config from "../config.json";
+import { LanguageConfig } from "../types/hymn";
+import HymnList from "@/components/HymnList";
+import { DialogFooter } from "@/components/ui/dialog";
 
 const Navigation = () => {
-    const languageOptions = config.map((lang: LanguageConfig) => ({
-        value: lang.key,
-        label: `${lang.title} (${lang.language})`
-    }));
+  const languageOptions = config.map((lang: LanguageConfig) => ({
+    value: lang.key,
+    label: `${lang.title} (${lang.language})`,
+  }));
 
-    // Add handlers for language changes
-    const handlePrimaryLanguageChange = (value: string) => {
-        setPrimaryLanguage(value);
-    };
+  // Add handlers for language changes
+  const handlePrimaryLanguageChange = (value: string) => {
+    setPrimaryLanguage(value);
+  };
 
-    const handleSecondaryLanguageChange = (value: string) => {
-        setSecondaryLanguage(value);
-    };
+  const handleSecondaryLanguageChange = (value: string) => {
+    setSecondaryLanguage(value);
+  };
 
   const {
     isDualMode,
@@ -64,6 +70,14 @@ const Navigation = () => {
   } = useHymn();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [info, setInfo] = useState(false);
+  const [isWatchDemoOpen, setIsWatchDemoOpen] = useState(false);
+  const [hymnNumber, setHymnNumber] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [localSearch, setLocalSearch] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [url, setUrl] = useState(window.location.pathname);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -94,10 +108,6 @@ const Navigation = () => {
   };
 
   const navigate = useNavigate();
-  const [hymnNumber, setHymnNumber] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [info, setInfo] = useState(false);
-  const [isWatchDemoOpen, setIsWatchDemoOpen] = useState(false);
 
   const handleNumberClick = (num: number) => {
     if (hymnNumber.length < 3) {
@@ -148,6 +158,11 @@ const Navigation = () => {
         case "f":
           toggleFullscreen();
           break;
+        case "q":
+          event.preventDefault();
+          setIsSearchOpen(true);
+          // setLocalSearch("");
+          break;
         case "0":
         case "1":
         case "2":
@@ -181,25 +196,42 @@ const Navigation = () => {
   }, [handleKeyPress]);
 
   // Save preferences whenever they change
-    useEffect(() => {
-      savePreferences({
-        isDarkMode,
-        isDualMode,
-        primaryLanguage,
-        secondaryLanguage
-      });
-    }, [isDarkMode, isDualMode, primaryLanguage, secondaryLanguage]);
+  useEffect(() => {
+    savePreferences({
+      isDarkMode,
+      isDualMode,
+      primaryLanguage,
+      secondaryLanguage,
+    });
+  }, [isDarkMode, isDualMode, primaryLanguage, secondaryLanguage]);
 
-    // Load preferences when the app starts
-      useEffect(() => {
-        const storedPreferences = loadPreferences();
-        if (storedPreferences) {
-          setIsDarkMode(storedPreferences.isDarkMode);
-          setIsDualMode(storedPreferences.isDualMode);
-          setPrimaryLanguage(storedPreferences.primaryLanguage);
-          setSecondaryLanguage(storedPreferences.secondaryLanguage || null);
-        }
-      }, []);
+  // Load preferences when the app starts
+  useEffect(() => {
+    const storedPreferences = loadPreferences();
+    if (storedPreferences) {
+      setIsDarkMode(storedPreferences.isDarkMode);
+      setIsDualMode(storedPreferences.isDualMode);
+      setPrimaryLanguage(storedPreferences.primaryLanguage);
+      setSecondaryLanguage(storedPreferences.secondaryLanguage || null);
+    }
+  }, []);
+
+  // Search submit handler
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchQuery(localSearch);
+    setShowResults(true);
+    setLocalSearch("");
+  };
+
+  // Reset results when dialog closes
+  useEffect(() => {
+    if (!isSearchOpen) {
+      setShowResults(false);
+      setLocalSearch("");
+      setSearchQuery("");
+    }
+  }, [isSearchOpen]);
 
   return (
     <nav
@@ -213,38 +245,29 @@ const Navigation = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
               <Languages className="md:mr-2 sm:-mr-2" />
-              <span className="hidden md:block">
-          {languageOptions.find(opt => opt.value === primaryLanguage)?.label || primaryLanguage}
+              <span className="hidden md:block max-w-36 truncate overflow-hidden">
+                {languageOptions.find((opt) => opt.value === primaryLanguage)
+                  ?.label || primaryLanguage}
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent align="start" sideOffset={4}>
             {languageOptions.map((lang) => (
               <DropdownMenuItem
-          key={lang.value}
-          onClick={() => handlePrimaryLanguageChange(lang.value)}
+                key={lang.value}
+                onClick={() => handlePrimaryLanguageChange(lang.value)}
               >
-          {lang.label}
+                {lang.label}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* <div className="relative flex-1 mx-2 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search hymns..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div> */}
-
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" className="sm:-mx-2 sm:-px-2">
-              <Grip  /> <span className="hidden md:block">123</span></Button>
+              <Grip /> <span className="hidden md:block">123</span>
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-w-[375px]">
             <DialogHeader>
@@ -308,14 +331,52 @@ const Navigation = () => {
           </DialogContent>
         </Dialog>
 
+        <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="sm:-mx-2 sm:-px-2">
+              <Search /> <span className="hidden md:block">search</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Search hymns by song title or lyrics</DialogTitle>
+              <DialogDescription>
+                {languageOptions.find((opt) => opt.value === primaryLanguage)
+                  ?.label || "Current Hymnal"}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSearchSubmit}>
+              <Input
+                type="search"
+                placeholder="Search hymns..."
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                className="mb-4"
+                autoFocus
+              />
+              <DialogFooter>
+                <Button type="submit" variant="default" className="w-full">
+                  Search
+                </Button>
+              </DialogFooter>
+            </form>
+            {showResults && (
+              <div className="mt-6 max-h-80 overflow-y-scroll ">
+                <HymnList onHymnClick={() => setIsSearchOpen(false)} />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
         <div className="flex gap-2">
           <Dialog open={info} onOpenChange={setInfo}>
             <DialogTrigger asChild>
               <Button variant="outline">
-                <BadgeInfo className="" /><span className="hidden md:block">help</span>
+                <BadgeInfo className="" />
+                <span className="hidden md:block">help</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[375px]">
+            <DialogContent className="max-w-[375px] md:max-w-[400px]">
               <DialogHeader>
                 <DialogTitle>Help & info</DialogTitle>
                 <DialogDescription>
@@ -337,16 +398,26 @@ const Navigation = () => {
                   <p className="text-sm text-muted-foreground">
                     Press <strong>ESC</strong> to close this dialog.
                   </p>
-                  <h4 className="text-md font-semibold mt-4">Hymn Shortcuts</h4>
+
                   <p className="text-sm text-muted-foreground">
-                    Press any key <strong>0-9</strong> to open the hymn number pad.
+                    Press any key <strong>0-9</strong> to open the hymn number
+                    pad.
                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    Press <strong>Q</strong> to search by title or
+                    lyrics.
+                    <span className="ml-1 bg-blue-100 text-blue-500 text-xs px-1 items-center rounded-full">
+                      new
+                    </span>
+                  </p>
+                  <h4 className="text-md font-semibold mt-4">Hymn Shortcuts</h4>
                   <p className="text-sm text-muted-foreground">
                     Press <strong>B</strong> to go back to the list of hymns.
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Press <strong>D</strong> to select second language (if
-                    available).
+                    Press <strong>D</strong> to select second language.<span className="ml-1 bg-blue-100 text-blue-500 text-xs px-1 items-center rounded-full">
+                      new
+                    </span>
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Press <strong>E</strong> to edit hymns on the Hymn page.
@@ -360,12 +431,14 @@ const Navigation = () => {
                     the next verse.
                   </p>
                   <p className="text-sm text-muted-foreground -my-1">
-                    Press <strong>SHIFT+</strong><strong className="text-lg ">&#8678;</strong> to go to
-                    the previous song.
+                    Press <strong>SHIFT+</strong>
+                    <strong className="text-lg ">&#8678;</strong> to go to the
+                    previous song.
                   </p>
                   <p className="text-sm text-muted-foreground -mt-2">
-                    Press <strong>SHIFT+</strong><strong className="text-lg ">&#8680;</strong> to go to
-                    the next song.
+                    Press <strong>SHIFT+</strong>
+                    <strong className="text-lg ">&#8680;</strong> to go to the
+                    next song.
                   </p>
                 </div>
               </div>
@@ -381,31 +454,35 @@ const Navigation = () => {
             onClick={() => setIsDualMode(!isDualMode)}
             className={isDualMode ? "bg-primary text-primary-foreground" : ""}
           >
-             <BookOpenText className="" />
-             <span className="hidden md:block">dual language mode</span>
+            <BookOpenText className="" />
+            {!isDualMode && (
+              <span className="hidden md:block">dual language mode</span>
+            )}
           </Button>
 
           {isDualMode && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Languages className="md:mr-2 sm:-mr-2" />
-                <span className="hidden md:block">
-                {languageOptions.find(opt => opt.value === secondaryLanguage)?.label || 'Select language'}
-                </span>
-              </Button>
+                <Button variant="outline">
+                  <Languages className="md:mr-2 sm:-mr-2" />
+                  <span className="hidden md:block max-w-36 truncate overflow-hidden">
+                    {languageOptions.find(
+                      (opt) => opt.value === secondaryLanguage
+                    )?.label || "Select language"}
+                  </span>
+                </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-              {languageOptions
-                .filter(lang => lang.value !== primaryLanguage)
-                .map((lang) => (
-                <DropdownMenuItem
-                  key={lang.value}
-                  onClick={() => handleSecondaryLanguageChange(lang.value)}
-                >
-                  {lang.label}
-                </DropdownMenuItem>
-                ))}
+              <DropdownMenuContent align="end" sideOffset={4}>
+                {languageOptions
+                  .filter((lang) => lang.value !== primaryLanguage)
+                  .map((lang) => (
+                    <DropdownMenuItem
+                      key={lang.value}
+                      onClick={() => handleSecondaryLanguageChange(lang.value)}
+                    >
+                      {lang.label}
+                    </DropdownMenuItem>
+                  ))}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -421,6 +498,6 @@ const Navigation = () => {
       </div>
     </nav>
   );
-}
+};
 
 export default Navigation;
