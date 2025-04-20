@@ -43,11 +43,11 @@ const EditHymnDialog = ({
   }, [hymn]);
 
   const handleSave = async () => {
-    console.log("Hymn: ", hymn, "Hymn ID: ", hymn.id);
+    // console.log("Hymn: ", hymn, "Hymn ID: ", hymn.id);
     if (!hymn || !hymn.id) return;
     
     setIsSaving(true);
-    console.log("Saving hymn:", { title});
+    // console.log("Saving hymn:", { title});
     try {
       const updatedHymn = await hymnService.updateHymn(
         hymn.id,
@@ -55,7 +55,7 @@ const EditHymnDialog = ({
         title,
         markdown
       );
-      console.log("Updated hymn:", updatedHymn);
+      // console.log("Updated hymn:", updatedHymn);
       if (updatedHymn) {
         toast.success("Hymn updated successfully");
         onHymnUpdated(updatedHymn);

@@ -39,6 +39,7 @@ import config from "../config.json";
 import { LanguageConfig } from "../types/hymn";
 import HymnList from "@/components/HymnList";
 import { DialogFooter } from "@/components/ui/dialog";
+import MobileSidebar from "./Sidebar";
 
 const Navigation = () => {
   const languageOptions = config.map((lang: LanguageConfig) => ({
@@ -119,6 +120,8 @@ const Navigation = () => {
   const handleBackspace = () => {
     setHymnNumber((prev) => prev.slice(0, -1));
   };
+
+  const isSDAH = primaryLanguage === "sdah";
 
   const handleGo = () => {
     if (hymnNumber) {
@@ -241,101 +244,111 @@ const Navigation = () => {
       )}
     >
       <div className="max-w-5xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              <Languages className="md:mr-2 sm:-mr-2" />
-              <span className="hidden md:block max-w-36 truncate overflow-hidden">
-                {languageOptions.find((opt) => opt.value === primaryLanguage)
-                  ?.label || primaryLanguage}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" sideOffset={4}>
-            {languageOptions.map((lang) => (
-              <DropdownMenuItem
-                key={lang.value}
-                onClick={() => handlePrimaryLanguageChange(lang.value)}
-              >
-                {lang.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="sm:-mx-2 sm:-px-2">
-              <Grip /> <span className="hidden md:block">123</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-[375px]">
-            <DialogHeader>
-              <DialogTitle>Go to Hymn</DialogTitle>
-              <DialogDescription>
-                Enter hymn number to navigate
-              </DialogDescription>
-            </DialogHeader>
-            <Input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="Enter hymn number"
-              value={hymnNumber}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^0-9]/g, "");
-                if (value.length <= 3) {
-                  setHymnNumber(value);
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleGo();
-                }
-              }}
-              className="mb-4"
-            />
-            <div className="md:grid grid-cols-3 gap-2 hidden  mx-auto -mt-4">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                <Button
-                  key={num}
-                  variant="outline"
-                  onClick={() => handleNumberClick(num)}
-                  className="rounded-full -px-3"
+        <div className="flex space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Languages className="md:mr-2 sm:-mr-2" />
+                <span className="hidden md:block max-w-32 truncate overflow-hidden">
+                  {languageOptions.find((opt) => opt.value === primaryLanguage)
+                    ?.label || primaryLanguage}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" sideOffset={4}>
+              {languageOptions.map((lang) => (
+                <DropdownMenuItem
+                  key={lang.value}
+                  onClick={() => handlePrimaryLanguageChange(lang.value)}
                 >
-                  {num}
-                </Button>
+                  {lang.label}
+                </DropdownMenuItem>
               ))}
-              <Button
-                variant="outline"
-                onClick={handleBackspace}
-                className="col-span-1"
-              >
-                ←
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="sm:-mx-2 sm:-px-2">
+                <Grip /> <span className="hidden md:block">123</span>
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleNumberClick(0)}
-                className="col-span-1"
-              >
-                0
-              </Button>
-              <Button
-                variant="default"
-                onClick={handleGo}
-                className="col-span-1"
-              >
-                Go
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="max-w-[375px]">
+              <DialogHeader>
+                <DialogTitle>Go to Hymn</DialogTitle>
+                <DialogDescription>
+                  Enter hymn number to navigate
+                </DialogDescription>
+              </DialogHeader>
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="Enter hymn number"
+                value={hymnNumber}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, "");
+                  if (value.length <= 3) {
+                    setHymnNumber(value);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleGo();
+                  }
+                }}
+                className="mb-4"
+              />
+              <div className="md:grid grid-cols-3 gap-2 hidden  mx-auto -mt-4">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                  <Button
+                    key={num}
+                    variant="outline"
+                    onClick={() => handleNumberClick(num)}
+                    className="rounded-full -px-3"
+                  >
+                    {num}
+                  </Button>
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={handleBackspace}
+                  className="col-span-1"
+                >
+                  ←
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleNumberClick(0)}
+                  className="col-span-1"
+                >
+                  0
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={handleGo}
+                  className="col-span-1"
+                >
+                  Go
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
 
         <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="sm:-mx-2 sm:-px-2">
-              <Search /> <span className="hidden md:block">search</span>
-            </Button>
+            <div className="flex-1 flex justify-center">
+              <Button
+                variant="outline"
+                className="w-full md:max-w-[250px] sm:-mx-2 sm:-px-2 flex items-center justify-start"
+              >
+                <Search className="text-muted-foreground" />{" "}
+                <p className=" text-muted-foreground  sm:inline-flex hidden ">
+                  search <span className="hidden lg:block ml-1">{" "} lyrics or title</span>
+                </p>
+              </Button>
+            </div>
           </DialogTrigger>
           <DialogContent className="max-w-[600px]">
             <DialogHeader>
@@ -371,7 +384,7 @@ const Navigation = () => {
         <div className="flex gap-2">
           <Dialog open={info} onOpenChange={setInfo}>
             <DialogTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="hidden md:flex">
                 <BadgeInfo className="" />
                 <span className="hidden md:block">help</span>
               </Button>
@@ -404,8 +417,7 @@ const Navigation = () => {
                     pad.
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Press <strong>Q</strong> to search by title or
-                    lyrics.
+                    Press <strong>Q</strong> to search by title or lyrics.
                     <span className="ml-1 bg-blue-100 text-blue-500 text-xs px-1 items-center rounded-full">
                       new
                     </span>
@@ -415,7 +427,8 @@ const Navigation = () => {
                     Press <strong>B</strong> to go back to the list of hymns.
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Press <strong>D</strong> to select second language.<span className="ml-1 bg-blue-100 text-blue-500 text-xs px-1 items-center rounded-full">
+                    Press <strong>D</strong> to select second language.
+                    <span className="ml-1 bg-blue-100 text-blue-500 text-xs px-1 items-center rounded-full">
                       new
                     </span>
                   </p>
@@ -449,23 +462,25 @@ const Navigation = () => {
             </DialogContent>
           </Dialog>
 
-          <Button
-            variant="outline"
-            onClick={() => setIsDualMode(!isDualMode)}
-            className={isDualMode ? "bg-primary text-primary-foreground" : ""}
-          >
-            <BookOpenText className="" />
-            {!isDualMode && (
-              <span className="hidden md:block">dual language mode</span>
-            )}
-          </Button>
+          {!isSDAH && (
+            <Button
+              variant="outline"
+              onClick={() => setIsDualMode(!isDualMode)}
+              className={isDualMode ? "bg-primary text-primary-foreground" : ""}
+            >
+              <BookOpenText className="" />
+              {!isDualMode && (
+                <span className="hidden md:block">dual language mode</span>
+              )}
+            </Button>
+          )}
 
           {isDualMode && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">
                   <Languages className="md:mr-2 sm:-mr-2" />
-                  <span className="hidden md:block max-w-36 truncate overflow-hidden">
+                  <span className="hidden md:block max-w-3 truncate overflow-hidden">
                     {languageOptions.find(
                       (opt) => opt.value === secondaryLanguage
                     )?.label || "Select language"}
@@ -491,9 +506,18 @@ const Navigation = () => {
             {isFullscreen ? <Minimize /> : <Maximize />}
           </Button>
 
-          <Button variant="outline" onClick={toggleDarkMode}>
+          <Button variant="outline" className="hidden md:flex" onClick={toggleDarkMode}>
             {isDarkMode ? <Sun /> : <Moon />}
           </Button>
+
+          {/* Mobile sidebar trigger */}
+          <div className="md:hidden">
+            <MobileSidebar
+              onDualMode={() => setIsDualMode(!isDualMode)}
+              onDarkMode={toggleDarkMode}
+              onInfo={() => setInfo(true)}
+            />
+          </div>
         </div>
       </div>
     </nav>

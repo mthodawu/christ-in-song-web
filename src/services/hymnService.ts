@@ -34,7 +34,7 @@ const loadHymnsForLanguage = async (language: Language): Promise<Hymn[]> => {
   }
 
   try {
-    console.log(`Loading hymns for ${language}... ${API_BASE_URL}/hymns/${language.toLowerCase()}`);
+    // console.log(`Loading hymns for ${language}... ${API_BASE_URL}/hymns/${language.toLowerCase()}`);
     const response = await axios.get(`${API_BASE_URL}/hymns/${language.toLowerCase()}`);
     const hymns = response.data.map((hymn: any) => ({
       id: hymn.id || `${language.toLowerCase()}-${hymn.number}`,
@@ -124,7 +124,7 @@ export const updateHymn = async (
   markdown: string
 ): Promise<Hymn | null> => {
   try {
-    console.log(`Updating hymn ${id} in ${language}`);
+    (`Updating hymn ${id} in ${language}`);
     const response = await axios.put(`${API_BASE_URL}/hymns/${language.toLowerCase()}/${id}`, {
       title,
       markdown
@@ -158,7 +158,7 @@ export const getHymnById = async (
   language: Language
 ): Promise<Hymn | null> => {
   try {
-    console.log("getHymnById called with id:", id, "and language:", language);
+    // console.log("getHymnById called with id:", id, "and language:", language);
     const response = await axios.get(`${API_BASE_URL}/hymns/${language.toLowerCase()}/${id}`);
     const hymn = response.data;
     if (hymn) {
