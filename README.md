@@ -42,6 +42,3 @@ To toggle dual mode:
 
 ## Contributing
 We welcome contributions! Please see our contributing guidelines for more details.
-
-## License
-MIT License - See LICENSE file for details
