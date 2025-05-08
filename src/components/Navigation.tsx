@@ -432,9 +432,9 @@ const Navigation = () => {
                       new
                     </span>
                   </p>
-                  {/* <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Press <strong>E</strong> to edit hymns on the Hymn page.
-                  </p> */}
+                  </p>
                   <p className="text-sm text-muted-foreground -my-1">
                     Press <strong className="text-lg ">&#8678;</strong> to go to
                     the previous verse.

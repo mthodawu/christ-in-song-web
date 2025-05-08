@@ -15,7 +15,7 @@ import { useHymn } from "@/context/HymnContext";
 import hymnService from "@/services/hymnService";
 import { cn } from "@/lib/utils";
 import type { Hymn } from "@/types/hymn";
-// import EditHymnDialog from "./EditHymnDialog";
+import EditHymnDialog from "./EditHymnDialog";
 import {
   Dialog,
   DialogContent,
@@ -42,7 +42,7 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
   const navigate = useNavigate();
   const [secondaryHymn, setSecondaryHymn] = useState<Hymn | null>(null);
   const [formattedVerses, setFormattedVerses] = useState<React.ReactNode[]>([]);
-  // const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentHymn, setCurrentHymn] = useState<Hymn>(hymn);
   const [numberBuffer, setNumberBuffer] = useState<string>("");
   const [isNumberPadActive, setIsNumberPadActive] = useState(false);
@@ -78,9 +78,9 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
   }, [primaryLanguage]); // Only depend on language changes
 
   // Handle hymn update
-  // const handleHymnUpdated = (updatedHymn: Hymn) => {
-  //   setCurrentHymn(updatedHymn);
-  // };
+  const handleHymnUpdated = (updatedHymn: Hymn) => {
+    setCurrentHymn(updatedHymn);
+  };
 
   // Handle number pad input
   const handleNumberInput = useCallback(
@@ -228,9 +228,9 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
 
       switch (event.key.toLowerCase()) {
       
-        // case "e":
-        //   setIsEditDialogOpen(true);
-        //   break;
+        case "e":
+          setIsEditDialogOpen(true);
+          break;
         case "b":
           navigate("/");
           break;
@@ -439,13 +439,13 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
         </div>
       </footer>
 
-      {/* <EditHymnDialog
+      <EditHymnDialog
         hymn={currentHymn}
         language={primaryLanguage}
         isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
         onHymnUpdated={handleHymnUpdated}
-      /> */}
+      />
     </div>
   );
 };
