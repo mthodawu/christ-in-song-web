@@ -369,7 +369,7 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
             <List className="md:hidden" />
           </Button>
 
-          {/* <Button
+          <Button
             variant="outline"
             size="sm"
             onClick={() => setIsEditDialogOpen(true)}
@@ -377,7 +377,7 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
           >
             <Edit className="md:mr-2 h-4 w-4 sm:-mx-1" />
             <span className="hidden md:block">Edit</span>
-          </Button> */}
+          </Button>
 
           <Button
             variant="outline"
