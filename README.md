@@ -1,7 +1,7 @@
-# HymnVerse Navigator
+# Christ in Song Web
 
 ## Overview
-HymnVerse Navigator is a web application designed to help users navigate and interact with hymn verses in multiple languages. It provides an intuitive interface for viewing, editing, and managing hymn translations.
+Christ in Song Web is a web application designed to help users navigate and interact with hymn verses in multiple languages. It provides an intuitive interface for viewing, editing, and managing hymn translations.
 
 ## Features
 - Multi-language hymn verse display
