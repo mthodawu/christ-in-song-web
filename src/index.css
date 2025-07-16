@@ -74,4 +74,11 @@
   .verse-transition {
     @apply transition-all duration-300 ease-in-out;
   }
+
+   /* Optional: Disable transitions in fullscreen mode (common for projection) */
+  :fullscreen .verse-transition,
+  :-webkit-full-screen .verse-transition,
+  :-moz-full-screen .verse-transition {
+    @apply transition-none;
+  }
 }
