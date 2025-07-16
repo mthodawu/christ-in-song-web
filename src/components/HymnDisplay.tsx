@@ -334,7 +334,7 @@ const HymnDisplay = ({ hymn, initialVerse = 0 }: HymnDisplayProps) => {
             {formattedVerses}
           </div>
 
-          <div className="text-center text-muted-foreground pb-4">
+          <div className="text-center text-muted-foreground pb-4 background-none">
             Verse {currentVerse + 1} of {verses.length}
           </div>
         </div>
