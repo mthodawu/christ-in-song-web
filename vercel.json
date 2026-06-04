@@ -23,19 +23,20 @@
       "dest": "backend/server.js"
     },
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    },
-    {
       "src": "/downloads",
       "dest": "backend/server.js"
     },
     {
       "src": "/downloads/(.*)",
       "dest": "backend/server.js"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
+    
   ]
 }
