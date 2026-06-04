@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import HymnPage from "./pages/HymnPage";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
+import PresentationStudio from "./pages/PresentationStudio";
 import { useEffect, useState } from "react";
 import { Language } from "./types/hymn";
 import {
@@ -57,6 +58,7 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/hymn/:id" element={<HymnPage />} />
               <Route path="/about" element={<About />} />
+              <Route path ="/download" element={<PresentationStudio />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

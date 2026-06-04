@@ -21,6 +21,7 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Routes
 app.use('/hymns', require('./routes/hymns'));
+app.use('/downloads', require('./routes/downloads'));
 
 // Sample Route
 app.get("/", (req, res) => {

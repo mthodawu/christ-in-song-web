@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PlayCircleIcon, Rocket, ArrowLeft } from "lucide-react";
+import { PlayCircleIcon, Rocket, ArrowLeft, Download } from "lucide-react";
 
 import {
   Dialog,
@@ -64,13 +64,22 @@ const About = () => {
             </p>
             <p className="text-sm text-muted-foreground w-4/5 md:w-"></p>
             <>
-              <Button
-                variant="outline"
-                className="md:w-1/5 flex items-center justify-center gap-2 text-primary my-2 group"
-                onClick={() => setIsWatchDemoOpen(true)}
-              >
-                Watch Demo <PlayCircleIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              </Button>
+              <div className="flex gap-3 my-2">
+                <Button
+                  variant="outline"
+                  className="flex items-center justify-center gap-2 text-primary group"
+                  onClick={() => setIsWatchDemoOpen(true)}
+                >
+                  Watch Demo <PlayCircleIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex items-center justify-center gap-1 text-primary group  "
+                  onClick={() => navigate("/download")}
+                >
+                  <img src="https://img.icons8.com/color/20/windows-11.png" alt="Windows 11" className="w-4 h-4" />Windows <Download className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                </Button>
+              </div>
               <Dialog open={isWatchDemoOpen} onOpenChange={setIsWatchDemoOpen}>
                 <DialogContent className="sm:max-w-[600px]">
                   <DialogHeader>
